@@ -281,9 +281,9 @@ if __name__=='__main__':
     labeldict = {}
     for p in sim_processes:
         labeldict[p] = p
-    labeldict['light'] = 'Light jets'
-    labeldict['c'] = 'c-jets'
-    labeldict['b'] = 'b-jets'
+    labeldict['b'] = r'$b$-jets'
+    labeldict['c'] = r'$c$-jets'
+    labeldict['light'] = r'$u$-, $d$-, $s$-jets'
 
     # set histogram styles and stacking
     styledict = {}
@@ -304,7 +304,7 @@ if __name__=='__main__':
         normalize = True
 
     # plot aesthetics settings
-    extracmstext = 'Resurrected'
+    extracmstext = 'Archived Data'
     lumiheaderparts = []
     if args.year is not None:
         lumiheaderparts.append(args.year)
@@ -421,9 +421,9 @@ if __name__=='__main__':
                 axs[0].text(0.05, 0.8, 'Simulation normalized to data', ha='left', va='top', fontsize=12,
                   transform=axs[0].transAxes)
             # data ratio pad
-            if datatag is not None: axs[1].set_ylim((0, 2))
+            #if datatag is not None: axs[1].set_ylim((0, 2))
 
-            # save the figure
+            # save the fige
             fig.tight_layout()
             figname = region_name + '_' + variable.name + '.png'
             figname = os.path.join(args.outputdir, figname)
@@ -472,7 +472,7 @@ if __name__=='__main__':
                     axs[0].text(0.05, 0.8, 'Simulation normalized to data', ha='left', va='top', fontsize=12,
                       transform=axs[0].transAxes)
                 # data ratio pad
-                if datatag is not None: axs[1].set_ylim((0, 2))
+                #if datatag is not None: axs[1].set_ylim((0, 2))
 
                 # save the figure
                 fig.tight_layout()

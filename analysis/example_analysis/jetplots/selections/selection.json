@@ -1,6 +1,6 @@
 {
   "selection": [
-    "recojet_pt > 10",
-    "(recojet_eta > -0.9) & (recojet_eta < 0.9)"
+    "np.divide(recojet_pt, np.abs(np.sin(recojet_theta))) > 10",
+    "np.abs(np.cos(recojet_theta)) < 0.65"
   ]
 }

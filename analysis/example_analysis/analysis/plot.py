@@ -508,6 +508,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
 
             # set y-axis title
             yaxtitle = 'Events'
+            if variable.variable.startswith('Jets_'): yaxtitle = 'Jets'
             include_binwidth = True # maybe later add as argument
             if include_binwidth:
                 if variable.unit is not None and len(variable.unit)>0:

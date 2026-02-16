@@ -14,17 +14,21 @@ if __name__=='__main__':
 
     # settings
     modeltag = '20260205_withsvloose'
-    ntupletag = 'withsvloose'
+    ntupletag = 'withdmerge'
     model = os.path.abspath(f'models/output_{modeltag}/model.onnx')
     preprocess = model.replace('model.onnx', 'preprocess.json')
-    outputdir = f'output_scores_model_{modeltag}'
-    runmode = 'condor'
-    resubmit = False
+    #outputdir = f'output_scores_model_{modeltag}'
+    outputdir = f'output_scores_model_20260205_withsvloose_for_withdmerge'
+    runmode = 'local'
+    resubmit = True
     ntuplename = f'ntuples-{ntupletag}' if ntupletag is not None else 'ntuples'
     files = [
       f'/eos/user/l/llambrec/aleph-data/{ntuplename}/eventlevel/mc/output_qqb_*.root',
       f'/eos/user/l/llambrec/aleph-data/{ntuplename}/eventlevel/data/output_data_*.root',
     ]
+
+    # set test mode
+    test = False
 
     # find files
     inputfiles = []
@@ -66,6 +70,11 @@ if __name__=='__main__':
         if objectselection is not None: cmd += f' --objectselection {objectselection}'
         cmd += f' --translation translations/translations.json'
         cmds.append(cmd)
+
+    # test mode
+    if test:
+        cmds = [cmds[0]]
+        runmode = 'local'
 
     # run commands
     if runmode=='local':

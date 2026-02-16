@@ -322,7 +322,7 @@ if __name__=='__main__':
             raise Exception(msg)
 
     # plot aesthetics settings
-    extracmstext = 'Resurrected'
+    extracmstext = 'Archived Data'
     lumiheaderparts = []
     if args.year is not None:
         lumiheaderparts.append(args.year)
