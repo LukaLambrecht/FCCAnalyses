@@ -251,9 +251,9 @@ ROOT::VecOps::RVec<int> VertexSeed_best(ROOT::VecOps::RVec<edm4hep::TrackState> 
       
       // fit a common vertex (fast method) and do basic checks
       // (done only for speedup, but disabled since it doesn't gain that much and might have some unwanted effects)
-      //vtx_seed = VertexFitterSimple::VertexFitter_Tk(2, tr_pair, false, 0, 0, 0, 0, 0, 0, true);
-      //double chi2 = vtx_seed.vertex.chi2; // normalised, but ndof is 1 anyway
-      //if(chi2 >= chi2_cut) continue;
+      vtx_seed = VertexFitterSimple::VertexFitter_Tk(2, tr_pair, false, 0, 0, 0, 0, 0, 0, true);
+      double chi2 = vtx_seed.vertex.chi2; // normalised, but ndof is 1 anyway
+      if(chi2 >= chi2_cut) continue;
 
       // fit a common vertex (full method)
       vtx_seed = VertexFitterSimple::VertexFitter_Tk(2, tr_pair);
@@ -320,12 +320,12 @@ ROOT::VecOps::RVec<int> addTrack_best(ROOT::VecOps::RVec<edm4hep::TrackState> tr
 
     // fit a common vertex (fast method) and do basic checks
     // (done only for speedup, but disabled since it doesn't gain that much and might have some unwanted effects)
-    //vtx = VertexFitterSimple::VertexFitter_Tk(2, tr_vtx, false, 0, 0, 0, 0, 0, 0, true);
-    //double chi2 = vtx.vertex.chi2; // normalised
-    //chi2 = chi2 * nDOF;
-    //if(chi2 >= chi2_cut) continue;
-    //ROOT::VecOps::RVec<float> chi2_tr = vtx.reco_chi2;
-    //if(chi2_tr[tr_vtx.size()-1] >= chi2Tr_cut) continue;
+    vtx = VertexFitterSimple::VertexFitter_Tk(2, tr_vtx, false, 0, 0, 0, 0, 0, 0, true);
+    double chi2 = vtx.vertex.chi2; // normalised
+    chi2 = chi2 * nDOF;
+    if(chi2 >= chi2_cut) continue;
+    ROOT::VecOps::RVec<float> chi2_tr = vtx.reco_chi2;
+    if(chi2_tr[tr_vtx.size()-1] >= chi2Tr_cut) continue;
 
     // fit a common vertex (full method)
     vtx = VertexFitterSimple::VertexFitter_Tk(2, tr_vtx);
@@ -494,7 +494,7 @@ ROOT::VecOps::RVec<bool> isV0(
       // - opposite charge
       if(t_pair[0].omega * t_pair[1].omega > 0) continue;
       // - more or less same direction
-      //if( p_i.DeltaR(p_j) > 1.5 ) continue;
+      if( p_i.DeltaR(p_j) > 0.4 ) continue;
 
       // fit common vertex
       double chi2max = 10.;
@@ -581,7 +581,7 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
       // - opposite charge
       if(tr_pair[0].omega * tr_pair[1].omega > 0) continue;
       // - more or less same direction
-      //if( p_i.DeltaR(p_j) > 1.5 ) continue;
+      if( p_i.DeltaR(p_j) > 0.4 ) continue;
 
       // try to make a V0 candidate
       ROOT::VecOps::RVec<double> V0_cand = get_V0candidate(V0_vtx, tr_pair, PV, true, chi2_cut);

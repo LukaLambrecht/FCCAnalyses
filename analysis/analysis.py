@@ -620,21 +620,42 @@ class RDFanalysis():
 
         # dE/dx values
         dfout = (
+
             dfout
-            .Define("dEdxPadsValue" , "dEdxPads.dQdx.value")
-            .Define("dEdxPadsError" , "dEdxPads.dQdx.error")
-            .Define("dEdxWiresValue" , "dEdxWires.dQdx.value")
-            .Define("dEdxWiresError" , "dEdxPads.dQdx.error")
+            .Define("dEdxPadsValue", "dEdxPads.dQdx.value")
+            .Define("dEdxPadsError", "dEdxPads.dQdx.error")
+            .Define("dEdxWiresValue", "dEdxWires.dQdx.value")
+            .Define("dEdxWiresError", "dEdxPads.dQdx.error")
 
-            .Define("jet_constituents_dEdx_pads_objs", "dEdxTools::build_constituents_dEdx()(RecoParticles, Reco2TrackLinks.index, dEdxPads, _dEdxPads_track.index, jetconstituents_ee_genkt)")
-            .Define("JetsConstituents_dEdx_pads_type", "dEdxTools::get_dEdx_type(jet_constituents_dEdx_pads_objs)")
-            .Define("JetsConstituents_dEdx_pads_value", "dEdxTools::get_dEdx_value(jet_constituents_dEdx_pads_objs)")
-            .Define("JetsConstituents_dEdx_pads_error", "dEdxTools::get_dEdx_error(jet_constituents_dEdx_pads_objs)")
+            # basic variables for pads
+            .Define("jet_constituents_dEdx_pads_objs", "dEdxTools::build_constituents_dEdx()(RecoParticles, Reco2TrackLinks.index, dEdxPads, _dEdxPads_track.index, jetconstituents_ee_genkt, false)")
+            .Define("jet_constituents_dEdx_pads_dedx", "jet_constituents_dEdx_pads_objs.dedx_constituents")
+            .Define("JetsConstituents_dEdx_pads_type", "dEdxTools::get_dEdx_type(jet_constituents_dEdx_pads_dedx)")
+            .Define("JetsConstituents_dEdx_pads_value", "dEdxTools::get_dEdx_value(jet_constituents_dEdx_pads_dedx)")
+            .Define("JetsConstituents_dEdx_pads_error", "dEdxTools::get_dEdx_error(jet_constituents_dEdx_pads_dedx)")
 
-            .Define("jet_constituents_dEdx_wires_objs", "dEdxTools::build_constituents_dEdx()(RecoParticles, Reco2TrackLinks.index, dEdxWires, _dEdxWires_track.index, jetconstituents_ee_genkt)")
-            .Define("JetsConstituents_dEdx_wires_type", "dEdxTools::get_dEdx_type(jet_constituents_dEdx_wires_objs)")
-            .Define("JetsConstituents_dEdx_wires_value", "dEdxTools::get_dEdx_value(jet_constituents_dEdx_wires_objs)")
-            .Define("JetsConstituents_dEdx_wires_error", "dEdxTools::get_dEdx_error(jet_constituents_dEdx_wires_objs)")
+            # PID hypotheses compatibility for pads
+            .Define("jet_constituents_dEdx_pads_pvals", "jet_constituents_dEdx_pads_objs.pid_array_constituents")
+            .Define("JetsConstituents_PID_pval_pads_ele", "dEdxTools::get_PID_pvalue(jet_constituents_dEdx_pads_pvals, 0)")
+            .Define("JetsConstituents_PID_pval_pads_mu", "dEdxTools::get_PID_pvalue(jet_constituents_dEdx_pads_pvals, 1)")
+            .Define("JetsConstituents_PID_pval_pads_pi", "dEdxTools::get_PID_pvalue(jet_constituents_dEdx_pads_pvals, 2)")
+            .Define("JetsConstituents_PID_pval_pads_kaon", "dEdxTools::get_PID_pvalue(jet_constituents_dEdx_pads_pvals, 3)")
+            .Define("JetsConstituents_PID_pval_pads_proton", "dEdxTools::get_PID_pvalue(jet_constituents_dEdx_pads_pvals, 4)")
+
+            # basic variables for wires
+            .Define("jet_constituents_dEdx_wires_objs", "dEdxTools::build_constituents_dEdx()(RecoParticles, Reco2TrackLinks.index, dEdxPads, _dEdxPads_track.index, jetconstituents_ee_genkt, true)")
+            .Define("jet_constituents_dEdx_wires_dedx", "jet_constituents_dEdx_wires_objs.dedx_constituents")
+            .Define("JetsConstituents_dEdx_wires_type", "dEdxTools::get_dEdx_type(jet_constituents_dEdx_wires_dedx)")
+            .Define("JetsConstituents_dEdx_wires_value", "dEdxTools::get_dEdx_value(jet_constituents_dEdx_wires_dedx)")
+            .Define("JetsConstituents_dEdx_wires_error", "dEdxTools::get_dEdx_error(jet_constituents_dEdx_wires_dedx)")
+
+            # PID hypotheses compatibility for wires
+            .Define("jet_constituents_dEdx_wires_pvals", "jet_constituents_dEdx_wires_objs.pid_array_constituents")
+            .Define("JetsConstituents_PID_pval_wires_ele", "dEdxTools::get_PID_pvalue(jet_constituents_dEdx_wires_pvals, 0)")
+            .Define("JetsConstituents_PID_pval_wires_mu", "dEdxTools::get_PID_pvalue(jet_constituents_dEdx_wires_pvals, 1)")
+            .Define("JetsConstituents_PID_pval_wires_pi", "dEdxTools::get_PID_pvalue(jet_constituents_dEdx_wires_pvals, 2)")
+            .Define("JetsConstituents_PID_pval_wires_kaon", "dEdxTools::get_PID_pvalue(jet_constituents_dEdx_wires_pvals, 3)")
+            .Define("JetsConstituents_PID_pval_wires_proton", "dEdxTools::get_PID_pvalue(jet_constituents_dEdx_wires_pvals, 4)")
         )
 
         # number of hits in tracking detectors
@@ -901,6 +922,18 @@ class RDFanalysis():
             'JetsConstituents_dEdx_wires_type',
             'JetsConstituents_dEdx_wires_value',
             'JetsConstituents_dEdx_wires_error',
+
+            'JetsConstituents_PID_pval_pads_ele',
+            'JetsConstituents_PID_pval_pads_mu',
+            'JetsConstituents_PID_pval_pads_pi',
+            'JetsConstituents_PID_pval_pads_kaon',
+            'JetsConstituents_PID_pval_pads_proton',
+
+            'JetsConstituents_PID_pval_wires_ele',
+            'JetsConstituents_PID_pval_wires_mu',
+            'JetsConstituents_PID_pval_wires_pi',
+            'JetsConstituents_PID_pval_wires_kaon',
+            'JetsConstituents_PID_pval_wires_proton',
 
             'JetsConstituents_d0_wrt0',
             'JetsConstituents_z0_wrt0',

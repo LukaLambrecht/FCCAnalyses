@@ -152,6 +152,18 @@ int main(int argc, char* argv[]) {
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_dEdx_wires_value = 0;
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_dEdx_wires_error = 0;
 
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_PID_pval_pads_ele = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_PID_pval_pads_mu = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_PID_pval_pads_pi = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_PID_pval_pads_kaon = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_PID_pval_pads_proton = 0;
+
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_PID_pval_wires_ele = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_PID_pval_wires_mu = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_PID_pval_wires_pi = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_PID_pval_wires_kaon = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_PID_pval_wires_proton = 0;
+
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_d0_wrt0 = 0;
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_z0_wrt0 = 0;
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_phi0_wrt0 = 0;
@@ -296,6 +308,18 @@ int main(int argc, char* argv[]) {
   ev->SetBranchAddress("JetsConstituents_dEdx_wires_type", &JetsConstituents_dEdx_wires_type);
   ev->SetBranchAddress("JetsConstituents_dEdx_wires_value", &JetsConstituents_dEdx_wires_value);
   ev->SetBranchAddress("JetsConstituents_dEdx_wires_error", &JetsConstituents_dEdx_wires_error);
+
+  ev->SetBranchAddress("JetsConstituents_PID_pval_pads_ele", &JetsConstituents_PID_pval_pads_ele);
+  ev->SetBranchAddress("JetsConstituents_PID_pval_pads_mu", &JetsConstituents_PID_pval_pads_mu);
+  ev->SetBranchAddress("JetsConstituents_PID_pval_pads_pi", &JetsConstituents_PID_pval_pads_pi);
+  ev->SetBranchAddress("JetsConstituents_PID_pval_pads_kaon", &JetsConstituents_PID_pval_pads_kaon);
+  ev->SetBranchAddress("JetsConstituents_PID_pval_pads_proton", &JetsConstituents_PID_pval_pads_proton);
+
+  ev->SetBranchAddress("JetsConstituents_PID_pval_wires_ele", &JetsConstituents_PID_pval_wires_ele);
+  ev->SetBranchAddress("JetsConstituents_PID_pval_wires_mu", &JetsConstituents_PID_pval_wires_mu);
+  ev->SetBranchAddress("JetsConstituents_PID_pval_wires_pi", &JetsConstituents_PID_pval_wires_pi);
+  ev->SetBranchAddress("JetsConstituents_PID_pval_wires_kaon", &JetsConstituents_PID_pval_wires_kaon);
+  ev->SetBranchAddress("JetsConstituents_PID_pval_wires_proton", &JetsConstituents_PID_pval_wires_proton);
 
   ev->SetBranchAddress("JetsConstituents_d0_wrt0", &JetsConstituents_d0_wrt0);
   ev->SetBranchAddress("JetsConstituents_z0_wrt0", &JetsConstituents_z0_wrt0);
@@ -455,6 +479,18 @@ int main(int argc, char* argv[]) {
   float pfcand_dEdx_wires_type[1000] = {0.};
   float pfcand_dEdx_wires_value[1000] = {0.};
   float pfcand_dEdx_wires_error[1000] = {0.};
+
+  float pfcand_PID_pval_pads_ele[1000] = {0.};
+  float pfcand_PID_pval_pads_mu[1000] = {0.};
+  float pfcand_PID_pval_pads_pi[1000] = {0.};
+  float pfcand_PID_pval_pads_kaon[1000] = {0.};
+  float pfcand_PID_pval_pads_proton[1000] = {0.};
+
+  float pfcand_PID_pval_wires_ele[1000] = {0.};
+  float pfcand_PID_pval_wires_mu[1000] = {0.};
+  float pfcand_PID_pval_wires_pi[1000] = {0.};
+  float pfcand_PID_pval_wires_kaon[1000] = {0.};
+  float pfcand_PID_pval_wires_proton[1000] = {0.};
 
   float pfcand_d0_wrt0[1000] = {0.};
   float pfcand_z0_wrt0[1000] = {0.};
@@ -622,6 +658,18 @@ int main(int argc, char* argv[]) {
   ntuple->Branch("pfcand_dEdx_wires_type", pfcand_dEdx_wires_type, "pfcand_dEdx_wires_type[nconst]/F");
   ntuple->Branch("pfcand_dEdx_wires_value", pfcand_dEdx_wires_value, "pfcand_dEdx_wires_value[nconst]/F");
   ntuple->Branch("pfcand_dEdx_wires_error", pfcand_dEdx_wires_error, "pfcand_dEdx_wires_error[nconst]/F");
+
+  ntuple->Branch("pfcand_PID_pval_pads_ele", pfcand_PID_pval_pads_ele, "pfcand_PID_pval_pads_ele[nconst]/F");
+  ntuple->Branch("pfcand_PID_pval_pads_mu", pfcand_PID_pval_pads_mu, "pfcand_PID_pval_pads_mu[nconst]/F");
+  ntuple->Branch("pfcand_PID_pval_pads_pi", pfcand_PID_pval_pads_pi, "pfcand_PID_pval_pads_pi[nconst]/F");
+  ntuple->Branch("pfcand_PID_pval_pads_kaon", pfcand_PID_pval_pads_kaon, "pfcand_PID_pval_pads_kaon[nconst]/F");
+  ntuple->Branch("pfcand_PID_pval_pads_proton", pfcand_PID_pval_pads_proton, "pfcand_PID_pval_pads_proton[nconst]/F");
+
+  ntuple->Branch("pfcand_PID_pval_wires_ele", pfcand_PID_pval_wires_ele, "pfcand_PID_pval_wires_ele[nconst]/F");
+  ntuple->Branch("pfcand_PID_pval_wires_mu", pfcand_PID_pval_wires_mu, "pfcand_PID_pval_wires_mu[nconst]/F");
+  ntuple->Branch("pfcand_PID_pval_wires_pi", pfcand_PID_pval_wires_pi, "pfcand_PID_pval_wires_pi[nconst]/F");
+  ntuple->Branch("pfcand_PID_pval_wires_kaon", pfcand_PID_pval_wires_kaon, "pfcand_PID_pval_wires_kaon[nconst]/F");
+  ntuple->Branch("pfcand_PID_pval_wires_proton", pfcand_PID_pval_wires_proton, "pfcand_PID_pval_wires_proton[nconst]/F");
 
   ntuple->Branch("pfcand_d0_wrt0", pfcand_d0_wrt0, "pfcand_d0_wrt0[nconst]/F");
   ntuple->Branch("pfcand_z0_wrt0", pfcand_z0_wrt0, "pfcand_z0_wrt0[nconst]/F");
@@ -829,6 +877,18 @@ int main(int argc, char* argv[]) {
         pfcand_dEdx_wires_type[k] = (float)(JetsConstituents_dEdx_wires_type->at(j))[k];
         pfcand_dEdx_wires_value[k] = (float)(JetsConstituents_dEdx_wires_value->at(j))[k];
         pfcand_dEdx_wires_error[k] = (float)(JetsConstituents_dEdx_wires_error->at(j))[k];
+
+        pfcand_PID_pval_pads_ele[k] = (float)(JetsConstituents_PID_pval_pads_ele->at(j))[k];
+        pfcand_PID_pval_pads_mu[k] = (float)(JetsConstituents_PID_pval_pads_mu->at(j))[k];
+        pfcand_PID_pval_pads_pi[k] = (float)(JetsConstituents_PID_pval_pads_pi->at(j))[k];
+        pfcand_PID_pval_pads_kaon[k] = (float)(JetsConstituents_PID_pval_pads_kaon->at(j))[k];
+        pfcand_PID_pval_pads_proton[k] = (float)(JetsConstituents_PID_pval_pads_proton->at(j))[k];
+
+        pfcand_PID_pval_wires_ele[k] = (float)(JetsConstituents_PID_pval_wires_ele->at(j))[k];
+        pfcand_PID_pval_wires_mu[k] = (float)(JetsConstituents_PID_pval_wires_mu->at(j))[k];
+        pfcand_PID_pval_wires_pi[k] = (float)(JetsConstituents_PID_pval_wires_pi->at(j))[k];
+        pfcand_PID_pval_wires_kaon[k] = (float)(JetsConstituents_PID_pval_wires_kaon->at(j))[k];
+        pfcand_PID_pval_wires_proton[k] = (float)(JetsConstituents_PID_pval_wires_proton->at(j))[k];
 
         pfcand_d0_wrt0[k] = (JetsConstituents_d0_wrt0->at(j))[k];
         pfcand_z0_wrt0[k] = (JetsConstituents_z0_wrt0->at(j))[k];
