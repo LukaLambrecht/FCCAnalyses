@@ -58,6 +58,14 @@ if __name__=='__main__':
         'electron': np.abs(events['JetsConstituents_pdgId'])==11
     }
 
+    labeldict = {
+        'pion': r'$\pi$',
+        'kaon': r'$K$',
+        'proton': r'$p$',
+        'muon': r'$\mu$',
+        'electron': r'$e$'
+    }
+
     # loop over pads and wires
     for system in ['pads', 'wires']:
         print(f'Running on system {system}...')
@@ -105,19 +113,20 @@ if __name__=='__main__':
         # make figure
         fig, ax = plt.subplots()
         for category_label, data in category_data.items():
-            ax.scatter(data[0], data[1], s=1, label=category_label, alpha=0.1)
+            ax.scatter(data[0], data[1], s=1, label=labeldict[category_label], alpha=0.1)
 
         # plot aesthetics
-        ax.set_ylabel('$dE/dx$', fontsize=12)
-        ax.set_xlabel('$p$', fontsize=12)
+        ax.set_ylabel('dE/dx', fontsize=15)
+        ax.set_xlabel('Momentum [Gev]', fontsize=15)
         ax.grid(which='both', axis='both')
-        leg = ax.legend()
+        leg = ax.legend(fontsize=15, loc='upper right')
         for lh in leg.legend_handles:
             lh.set_alpha(1)
             lh.set_sizes([5])
         ax.set_xscale('log')
         ax.set_ylim((0, 10))
         ax.set_xlim((0.1, 10))
+        ax.tick_params(labelsize=12)
 
         # save figure
         fig.tight_layout()

@@ -351,7 +351,7 @@ class RDFanalysis():
             #.Define("PrimaryVertexP4", "getRecoPrimaryVertex(Vertices)")
             
             # alternative: recalculate reco primary vertex
-            .Define("PrimaryTracks", "PrimaryVertexTools::getPrimaryTracks(SelectedTracks, 5., Beamspot_x, Beamspot_y, Beamspot_z)")
+            .Define("PrimaryTracks", "PrimaryVertexTools::getPrimaryTracks(SelectedTracks, 25., Beamspot_x, Beamspot_y, Beamspot_z)")
             .Define("PrimaryVertexObject", "PrimaryVertexTools::fitRecoPrimaryVertex(PrimaryTracks, Beamspot_x, Beamspot_y, Beamspot_z)")
             .Define("PrimaryVertex", "FCCAnalyses::VertexingUtils::get_VertexData(PrimaryVertexObject)")
             .Define("PrimaryVertexP4", "TLorentzVector(PrimaryVertex.position.x, PrimaryVertex.position.y, PrimaryVertex.position.z, 0.)")
@@ -625,7 +625,7 @@ class RDFanalysis():
             .Define("dEdxPadsValue", "dEdxPads.dQdx.value")
             .Define("dEdxPadsError", "dEdxPads.dQdx.error")
             .Define("dEdxWiresValue", "dEdxWires.dQdx.value")
-            .Define("dEdxWiresError", "dEdxPads.dQdx.error")
+            .Define("dEdxWiresError", "dEdxWires.dQdx.error")
 
             # basic variables for pads
             .Define("jet_constituents_dEdx_pads_objs", "dEdxTools::build_constituents_dEdx()(RecoParticles, Reco2TrackLinks.index, dEdxPads, _dEdxPads_track.index, jetconstituents_ee_genkt, false)")
@@ -643,7 +643,7 @@ class RDFanalysis():
             .Define("JetsConstituents_PID_pval_pads_proton", "dEdxTools::get_PID_pvalue(jet_constituents_dEdx_pads_pvals, 4)")
 
             # basic variables for wires
-            .Define("jet_constituents_dEdx_wires_objs", "dEdxTools::build_constituents_dEdx()(RecoParticles, Reco2TrackLinks.index, dEdxPads, _dEdxPads_track.index, jetconstituents_ee_genkt, true)")
+            .Define("jet_constituents_dEdx_wires_objs", "dEdxTools::build_constituents_dEdx()(RecoParticles, Reco2TrackLinks.index, dEdxWires, _dEdxWires_track.index, jetconstituents_ee_genkt, true)")
             .Define("jet_constituents_dEdx_wires_dedx", "jet_constituents_dEdx_wires_objs.dedx_constituents")
             .Define("JetsConstituents_dEdx_wires_type", "dEdxTools::get_dEdx_type(jet_constituents_dEdx_wires_dedx)")
             .Define("JetsConstituents_dEdx_wires_value", "dEdxTools::get_dEdx_value(jet_constituents_dEdx_wires_dedx)")
