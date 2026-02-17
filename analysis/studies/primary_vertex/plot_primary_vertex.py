@@ -15,6 +15,7 @@ if __name__=='__main__':
     # settings
     inputfiles = sys.argv[1:]
     treename = 'events'
+    outputdir = 'output_plots'
     branches_to_read = [
       'PV_x',
       'PV_y',
@@ -41,6 +42,9 @@ if __name__=='__main__':
         with uproot.open(readstr) as f:
             batches.append(f.arrays(branches_to_read))
     events = ak.concatenate(batches)
+
+    # make output directory
+    if not os.path.exists(outputdir): os.makedirs(outputdir)
 
     # loop over individual variables to plot
     for variable in events.fields:
@@ -69,12 +73,14 @@ if __name__=='__main__':
 
         # save figure
         fig.tight_layout()
-        fig.savefig(variable+'.png')
+        figname = os.path.join(variable+'.png')
+        fig.savefig(figname)
 
         # same with log scale
         ax.set_yscale('log')
         fig.tight_layout()
-        fig.savefig(variable+'_log.png')
+        figname = os.path.join(variable+'.png')
+        fig.savefig(figname)
 
         # close figures to save memory
         plt.close()
@@ -105,7 +111,8 @@ if __name__=='__main__':
         ax.set_xlim((xmin, xmax))
         ax.set_ylim((ymin, ymax))
         fig.tight_layout()
-        fig.savefig(variable+'_vs_'+matching_variable+'_scatter.png')
+        figname = os.path.join(outputdir, variable+'_vs_'+matching_variable+'_scatter.png')
+        fig.savefig(figname)
 
         # make density histogram
         xbins = np.linspace(xmin, xmax, num=51)
@@ -117,4 +124,19 @@ if __name__=='__main__':
         ax.set_xlabel(namedict[matching_variable], fontsize=12)
         ax.set_ylabel(namedict[variable], fontsize=12)
         fig.tight_layout()
-        fig.savefig(variable+'_vs_'+matching_variable+'_density.png')
+        figname = os.path.join(outputdir, variable+'_vs_'+matching_variable+'_density.png')
+        fig.savefig(figname)
+
+        # make residual histogram
+        data = ydata - xdata
+        xmin = np.quantile(data, 0.01)
+        xmax = np.quantile(data, 0.99)
+        bins = np.linspace(xmin, xmax, num=51)
+        fig, ax = plt.subplots()
+        ax.hist(data, bins=bins, density=True)
+        ax.set_ylabel('Events (normalized)', fontsize=12)
+        ax.set_xlabel(namedict[variable] + ' residual', fontsize=12)
+        text = ax.text(0.05, 0.95, r'$\sigma$ = ' + '{:.3e}'.format(np.std(data)), va='top', transform=ax.transAxes)
+        text.set_bbox({'facecolor': 'white', 'alpha': 0.5})
+        figname = os.path.join(outputdir, variable+'_vs_'+matching_variable+'_residual.png')
+        fig.savefig(figname)

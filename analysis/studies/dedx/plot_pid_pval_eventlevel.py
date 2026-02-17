@@ -120,6 +120,8 @@ if __name__=='__main__':
                 ax.stairs(hist, edges=bins, linewidth=3, label=category_label, color=color, alpha=1)
 
             # plot aesthetics
+            text = ax.text(0.05, 0.9, f'{system}\n{pidtype} PID p-value', fontsize=12, transform=ax.transAxes)
+            text.set_bbox(dict(facecolor='white', alpha=0.5))
             ax.set_ylabel('Jet constituents (normalized)', fontsize=12)
             ax.set_xlabel('Signed p-value', fontsize=12)
             ax.grid(which='both', axis='both')
@@ -148,6 +150,8 @@ if __name__=='__main__':
                 ax.stairs(hist, edges=bins, linewidth=3, label=category_label, color=color, alpha=1)
 
             # plot aesthetics
+            text = ax.text(0.05, 0.9, f'{system}\n{pidtype} PID p-value', fontsize=12, transform=ax.transAxes)
+            text.set_bbox(dict(facecolor='white', alpha=0.5))
             ax.set_ylabel('Jet constituents (normalized)', fontsize=12)
             ax.set_xlabel('Absolute p-value', fontsize=12)
             ax.grid(which='both', axis='both')
