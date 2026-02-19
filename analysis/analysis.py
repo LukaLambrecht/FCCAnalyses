@@ -257,6 +257,13 @@ class RDFanalysis():
         if det=='aleph': dfout = dfout.Alias("Reco2TrackLinks", "_RecoParticles_tracks")
         elif det=='fcc': dfout = dfout.Define("Reco2TrackLinks", "makeDummyRecoToTracks(ReconstructedParticles)")
 
+        # add event identifiers
+        dfout = (
+            dfout
+            .Define("runNumber", "EventHeader.runNumber")
+            .Define("eventNumber", "EventHeader.eventNumber")
+        )
+
         # do gen-level stuff
         if dtype=='sim':
             dfout = (
@@ -783,6 +790,12 @@ class RDFanalysis():
 
         # define output branches
         branchList = []
+
+        # event identifiers
+        branchList = [
+            'runNumber',
+            'eventNumber'
+        ]
 
         # gen-level stuff
         branchList += [
