@@ -29,7 +29,7 @@ if __name__=='__main__':
 
     # make a summary figure
     fig, axs = plt.subplots(nrows=6, figsize=(12,12))
-    colors = {'x': 'darkviolet', 'y': 'mediumpurple', 'z': 'blue'}
+    colors = {'x': 'deepskyblue', 'y': 'royalblue', 'z': 'darkorchid'}
     for idx, varname in enumerate(varnames):
         ax1 = axs[2*idx]
         ax2 = axs[2*idx+1]
@@ -54,17 +54,21 @@ if __name__=='__main__':
         varlabel = f'Primary vertex {coord}-coordinate'
         ax1.set_xticklabels([])
         ax1.set_xticks([])
-        text = ax1.text(0.98, 0.95, varlabel + ' fitted center + width', ha='right', va='top', transform=ax1.transAxes)
+        text = ax1.text(0.98, 0.95, varlabel + ' fitted center + width', ha='right', va='top',
+                        transform=ax1.transAxes, fontsize=15)
         text.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
+        ax1.tick_params(labelsize=15)
         ax2.set_xticklabels([])
         ax2.set_xticks([])
-        text = ax2.text(0.98, 0.95, varlabel + ' width', ha='right', va='top', transform=ax2.transAxes)
+        text = ax2.text(0.98, 0.95, varlabel + ' width', ha='right', va='top',
+                        transform=ax2.transAxes, fontsize=15)
         text.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
         ax2.grid(axis='y', which='both', linestyle='dashed', color='grey')
         ax2.set_ylim((0, ax2.get_ylim()[1]*1.2))
+        ax2.tick_params(labelsize=15)
 
     # more plot aesthetics
-    axs[5].set_xlabel('Run')
+    axs[5].set_xlabel('Run', fontsize=15)
     fig.subplots_adjust(wspace=0, hspace=0)
 
     # save figure
@@ -75,7 +79,7 @@ if __name__=='__main__':
 
     # make another summary figure
     fig, axs = plt.subplots(nrows=6, figsize=(12,12))
-    colors = {'x': 'darkviolet', 'y': 'mediumpurple', 'z': 'blue'}
+    colors = {'x': 'deepskyblue', 'y': 'royalblue', 'z': 'darkorchid'}
     for idx, varname in enumerate(varnames):
         ax1 = axs[2*idx]
         ax2 = axs[2*idx + 1]
@@ -101,17 +105,19 @@ if __name__=='__main__':
         ax1.set_xticklabels([])
         ax1.set_xticks([])
         text = ax1.text(0.98, 0.95, varlabel + ' fitted center',
-          ha='right', va='top', transform=ax1.transAxes, fontsize=12)
+          ha='right', va='top', transform=ax1.transAxes, fontsize=15)
         text.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
-        ax1.set_ylabel(f'{coord} [cm]', fontsize=12)
+        ax1.set_ylabel(f'{coord} [cm]', fontsize=15)
+        ax1.tick_params(labelsize=15)
         ax2.set_xticklabels([])
         ax2.set_xticks([])
         text = ax2.text(0.98, 0.95, varlabel + ' uncertainty on fitted center',
-          ha='right', va='top', transform=ax2.transAxes, fontsize=12)
+          ha='right', va='top', transform=ax2.transAxes, fontsize=15)
         text.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
         ax2.grid(axis='y', which='both', linestyle='dashed', color='grey')
         ax2.set_ylim((0, ax2.get_ylim()[1]*1.2))
-        ax2.set_ylabel(f'{coord}-uncertainty [cm]', fontsize=12)
+        ax2.set_ylabel(f'{coord}-uncertainty [cm]', fontsize=15)
+        ax2.tick_params(labelsize=15)
 
     # more plot aesthetics
     axs[5].set_xlabel('Run', fontsize=15)
