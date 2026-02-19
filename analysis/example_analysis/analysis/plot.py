@@ -19,7 +19,7 @@ sys.path.append(topdir)
 from tools.variabletools import read_variables
 from tools.variabletools import HistogramVariable, DoubleHistogramVariable
 from tools.samplelisttools import read_samplelist, read_sampledict, find_files
-from tools.lumitools import get_lumidict
+from tools.lumitools import get_lumidict, get_sqrtsdict
 from tools.plottools import make_hist_from_events
 from tools.plottools import merge_events, merge_sampledict
 from tools.plottools import make_batches
@@ -33,6 +33,10 @@ from analysis.systematics import get_weight_variation
 from analysis.systematics import format_systematic_name
 from analysis.external_variables import read_external_variables
 from plotting.plot import plot
+
+# global pyplot settings
+plt.rc("text", usetex=True)
+plt.rc("font", family="serif")
 
 
 def make_histograms(datastruct, variables,
@@ -414,9 +418,11 @@ def plot_hists_default(hists_combined, variables, outputdir,
     # make color dict
     if colordict is None:
         colordict = {}
-        colordict['qqb'] = 'deepskyblue'
-        colordict['light'] = 'lightskyblue'
-        colordict['cc'] = 'deepskyblue'
+        colordict['qqb'] = 'grey'
+        colordict['light'] = 'grey'
+        colordict['uudd'] = 'paleturquoise'
+        colordict['ss'] = 'lightskyblue'
+        colordict['cc'] = 'slateblue'
         colordict['bb'] = 'darkorchid'
 
     # make label dict
@@ -425,8 +431,9 @@ def plot_hists_default(hists_combined, variables, outputdir,
         for p in sim_processes:
             labeldict[p] = p
         labeldict['bb'] = r'$b\overline{b}$'
-        labeldict['cc'] = r'$c\bar{c}$'
-        labeldict['light'] = r'$u\overline{u}$, $d\overline{d}$, $s\overline{s}$'
+        labeldict['cc'] = r'$c\overline{c}$'
+        labeldict['ss'] = r'$s\overline{s}$'
+        labeldict['uudd'] = r'$u\overline{u}$, $d\overline{d}$'
 
     # set histogram styles
     if styledict is None:
@@ -545,7 +552,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
 
             # some more plot aesthetics
             axs[0].set_ylim((0, axs[0].get_ylim()[1]*1.4))
-            axs[0].legend(loc='upper right', fontsize=15)
+            axs[0].legend(loc='upper right', fontsize=17, ncols=3)
             #if len(regions.keys())>1:
             #    axs[0].text(0.05, 0.9, region_name, ha='left', va='top', fontsize=12,
             #        transform=axs[0].transAxes)
@@ -556,7 +563,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
             #    axs[0].text(0.05, 0.85, label, ha='left', va='top', fontsize=12,
             #      transform=axs[0].transAxes)
             if normalizesim:
-                axs[0].text(0.05, 0.8, 'Simulation normalized to data', ha='left', va='top', fontsize=12,
+                axs[0].text(0.05, 0.8, 'Simulation normalized to data', ha='left', va='top', fontsize=15,
                   transform=axs[0].transAxes)
             # data ratio pad
             #if datatag is not None: axs[1].set_ylim((0, 2))
@@ -598,7 +605,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
                     if not normalize: ymin = np.min(histarray[np.nonzero(histarray)])
                     else: ymin = axs[0].get_ylim()[0]
                     axs[0].set_ylim((ymin, axs[0].get_ylim()[1]**1.4))
-                axs[0].legend(loc='upper right', fontsize=15)
+                axs[0].legend(loc='upper right', fontsize=17, ncols=3)
                 #if len(regions.keys())>1:
                 #    axs[0].text(0.05, 0.9, region_name, ha='left', va='top', fontsize=12,
                 #        transform=axs[0].transAxes)
@@ -609,7 +616,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
                 #    axs[0].text(0.05, 0.85, label, ha='left', va='top', fontsize=12,
                 #      transform=axs[0].transAxes)
                 if normalizesim:
-                    axs[0].text(0.05, 0.8, 'Simulation normalized to data', ha='left', va='top', fontsize=12,
+                    axs[0].text(0.05, 0.8, 'Simulation normalized to data', ha='left', va='top', fontsize=15,
                       transform=axs[0].transAxes)
                 # data ratio pad
                 #if datatag is not None: axs[1].set_ylim((0, 2))
@@ -642,6 +649,7 @@ if __name__=='__main__':
     parser.add_argument('--files_per_batch', default=None)
     parser.add_argument('--year', default=None)
     parser.add_argument('--luminosity', default=-1, type=float)
+    parser.add_argument('--sqrts', default=-1, type=float)
     parser.add_argument('--xsections', default=None)
     parser.add_argument('--merge', default=None)
     parser.add_argument('--split', default=None)
@@ -776,17 +784,26 @@ if __name__=='__main__':
     variablelist = sum([get_variable_names(v) for v in variablelist], [])
     variablelist = list(set(variablelist))
 
-    # get luminosity from year
+    # get luminosity and center-of-mass energy from year
     luminosity = args.luminosity
+    sqrts = args.sqrts
     if args.year is not None:
         lumi_from_year = get_lumidict()[args.year]
+        sqrts_from_year = get_sqrtsdict()[args.year]
         if args.luminosity is None or args.luminosity < 0:
             luminosity = lumi_from_year
         elif luminosity!=lumi_from_year:
             msg = f'WARNING: found inconsistency between provided luminosity ({luminosity})'
             msg += f' and the one corresponding to the provided year ({args.year}: {lumi_from_year}).'
             print(msg)
+        if args.sqrts is None or args.sqrts < 0:
+            sqrts = sqrts_from_year
+        elif sqrts!=sqrts_from_year:
+            msg = f'WARNING: found inconsistency between provided sqrt(s) ({sqrts})'
+            msg += f' and the one corresponding to the provided year ({args.year}: {sqrts_from_year}).'
+            print(msg)
     if luminosity < 0: luminosity = None
+    if sqrts < 0: sqrts = None
 
     # define variables to read
     branches_to_read = []
@@ -855,7 +872,9 @@ if __name__=='__main__':
     if args.year is not None:
         lumiheaderparts.append(args.year)
     if luminosity is not None:
-        lumiheaderparts.append('{:.2f}'.format(luminosity) + ' pb$^{-1}$')
+        lumiheaderparts.append('{:.1f}'.format(luminosity) + ' pb$^{-1}$')
+    if sqrts is not None:
+        lumiheaderparts.append('{:.1f}'.format(sqrts) + ' GeV')
     lumiheader = ', '.join(lumiheaderparts)
 
     # make output directory

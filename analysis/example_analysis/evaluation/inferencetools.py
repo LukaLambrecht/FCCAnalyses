@@ -65,14 +65,22 @@ def add_variables(events, names_only=False):
             'JetsConstituents_pt', 'JetsConstituents_e',
             'JetsConstituents_thetarel', 'JetsConstituents_phirel',
             'Jets_pt', 'Jets_e', 'Jets_mass',
-            'SecondaryVertices_chi2Normalized'
+            'SecondaryVertices_chi2Normalized',
+            'SecondaryVertices_p',
+            'SecondaryVertices_thetarel',
+            'SecondaryVertices_phirel'
           ],
           'output_names': [
             'JetsConstituents_mask',
             'JetsConstituents_pt_log', 'JetsConstituents_e_log',
             'JetsConstituents_drrel',
             'Jets_pt_log', 'Jets_e_log', 'Jets_mass_log',
-            'SecondaryVertices_mask'
+            'SecondaryVertices_mask',
+            'SecondaryVertices_pt_proxy',
+            'SecondaryVertices_px_proxy',
+            'SecondaryVertices_py_proxy',
+            'SecondaryVertices_pz_proxy',
+            'SecondaryVertices_e_proxy'
           ]
         }
         return names
@@ -85,6 +93,11 @@ def add_variables(events, names_only=False):
     events['Jets_e_log'] = np.log(events['Jets_e'])
     events['Jets_mass_log'] = np.log(events['Jets_mass'])
     events['SecondaryVertices_mask'] = ( events['SecondaryVertices_chi2Normalized'] > 0. )
+    events['SecondaryVertices_pt_proxy'] = np.multiply(events['SecondaryVertices_p'], np.sin(events['SecondaryVertices_thetarel']))
+    events['SecondaryVertices_px_proxy'] = np.multiply(events['SecondaryVertices_pt_proxy'], np.cos(events['SecondaryVertices_phirel']))
+    events['SecondaryVertices_py_proxy'] = np.multiply(events['SecondaryVertices_pt_proxy'], np.sin(events['SecondaryVertices_phirel']))
+    events['SecondaryVertices_pz_proxy'] = np.multiply(events['SecondaryVertices_p'], np.cos(events['SecondaryVertices_thetarel']))
+    events['SecondaryVertices_e_proxy'] = np.sqrt(np.square(events['SecondaryVertices_px_proxy']) + np.square(events['SecondaryVertices_py_proxy']) + np.square(events['SecondaryVertices_pz_proxy']) + np.square(events['SecondaryVertices_mass']))
     return events
 
 
@@ -133,12 +146,11 @@ def infer_jets(jets, modelname, prepdict, translation=None, batch_size=None):
     # get the data in correct format
     data = preprocess_jets(jets, prepdict, translation=translation)
     if 'part' in modelname:
-        if 'points' in data.keys():
-            data.pop('points')
-            # (somehow this key is missing in the onnx model inputs,
-            # not clear if this is expected,
-            # or if the model will be evaluated correctly without it,
-            # but seems to be fine...)
+        # (somehow some keys are missing in the onnx model inputs; not clear if this is expected,
+        # or if the model will be evaluated correctly without it, but seems to be fine...)
+        if 'points' in data.keys(): data.pop('points')
+        if 'pf_points' in data.keys(): data.pop('pf_points')
+        if 'sv_points' in data.keys(): data.pop('sv_points')
 
     # divide in batches
     ndata = data[list(data.keys())[0]].shape[0]

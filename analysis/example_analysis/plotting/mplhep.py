@@ -28,11 +28,15 @@ def histplot(histograms,
     for idx in range(len(histograms)):
 
         # set baseline
-        baseline = np.zeros(len(histograms[idx]))
-        if stack: baseline = sum(histograms[:idx])
+        line = histograms[idx]
+        baseline = np.zeros(len(line))
+        if stack:
+            baseline = sum(histograms[:idx])
+            line = baseline + histograms[idx]
+            
 
         # make plot
-        ax.stairs(baseline + histograms[idx],
+        ax.stairs(line,
                   baseline = baseline,
                   edges = bins,
                   fill = (histtype=='fill'),

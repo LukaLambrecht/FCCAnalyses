@@ -1,6 +1,7 @@
 {
   "qqb": {
-    "light": "(genEventType>=1) & (genEventType<=3)",
+    "uudd": "(genEventType>=1) & (genEventType<=2)",
+    "ss": "(genEventType==3)",
     "cc": "(genEventType==4)",
     "bb": "(genEventType==5)"
   }

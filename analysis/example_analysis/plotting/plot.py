@@ -338,15 +338,20 @@ def plot(sig=None, bkg=None, data=None,
         cmstext = r'$\bf{ALEPH}$'
         if extracmstext is not None:
             for part in extracmstext.split(' '): cmstext += r' $\it{' + f' {part}' + r'}$'
-        ax.text(0.02, 0.98, cmstext,
-                ha='left', va='top', fontsize=20, transform=ax.transAxes)
-        # modify the axis range to accommodate the CMS text
-        if logscale:
-            yscale = ax.get_ylim()[1]/ax.get_ylim()[0]
-            ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1]*yscale**(0.2))
+        cmstext_in_box = False # maybe later add as argument
+        if cmstext_in_box:
+            ax.text(0.02, 0.98, cmstext,
+                    ha='left', va='top', fontsize=20, transform=ax.transAxes)
+            # modify the axis range to accommodate the CMS text
+            if logscale:
+                yscale = ax.get_ylim()[1]/ax.get_ylim()[0]
+                ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1]*yscale**(0.2))
+            else:
+                yscale = ax.get_ylim()[1] - ax.get_ylim()[0]
+                ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1] + yscale*0.2)
         else:
-            yscale = ax.get_ylim()[1] - ax.get_ylim()[0]
-            ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1] + yscale*0.2)
+            ax.text(0., 1., cmstext,
+                    ha='left', va='bottom', fontsize=20, transform=ax.transAxes)
     if lumiheader is not None:
         ax.text(1., 1., lumiheader,
                 ha='right', va='bottom', fontsize=20, transform=ax.transAxes)
@@ -363,10 +368,10 @@ def plot(sig=None, bkg=None, data=None,
         if xaxtitle is not None and len(xaxtitle)>0:
             if unit is not None and len(unit)>0:
                 xaxtitle += f' [{unit}]'
-            ax.set_xlabel(xaxtitle, fontsize=20)
+            ax.set_xlabel(xaxtitle, fontsize=22)
     
     # set y-axis title
-    if yaxtitle is not None: ax.set_ylabel(yaxtitle, fontsize=20)
+    if yaxtitle is not None: ax.set_ylabel(yaxtitle, fontsize=22)
     
     # make legend
     if dolegend:
@@ -376,7 +381,7 @@ def plot(sig=None, bkg=None, data=None,
         if len(hists) > 5:
             loc = 'upper left'
             bbox_to_anchor = (1., 1.)
-        ax.legend(loc=loc, bbox_to_anchor=bbox_to_anchor, fontsize=10)
+        ax.legend(loc=loc, bbox_to_anchor=bbox_to_anchor, fontsize=17)
 
     # lower pad
     if ratios is not None and len(ratios)>0:
@@ -511,7 +516,7 @@ def plot(sig=None, bkg=None, data=None,
             # some plot aesthetics
             ax.set_ylim((0.5, 1.5))
             ax.tick_params(axis='both', which='both', labelsize=15)
-            if yaxtitle is not None: ax.set_ylabel(yaxtitle, fontsize=20)
+            if yaxtitle is not None: ax.set_ylabel(yaxtitle, fontsize=22)
             ax.axhline(y=1, color='grey', linestyle='dashed')
 
             # some plot aesthetics: remove the title and labels
@@ -521,7 +526,7 @@ def plot(sig=None, bkg=None, data=None,
 
         # add title and labels to the lowest pad
         if xaxtitle is not None and len(xaxtitle)>0:
-            axs[-1].set_xlabel(xaxtitle, fontsize=20)
+            axs[-1].set_xlabel(xaxtitle, fontsize=22)
         if isinstance(variable, DoubleHistogramVariable):
             axs[-1].set_xticks(xtick_pos, labels=xtick_labels)
 

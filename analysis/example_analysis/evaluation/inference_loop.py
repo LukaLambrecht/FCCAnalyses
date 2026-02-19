@@ -13,12 +13,12 @@ import tools.slurmtools as st
 if __name__=='__main__':
 
     # settings
-    modeltag = '20260205_withsvloose'
-    ntupletag = 'withdmerge'
+    modeltag = '20260217_withstrange_withdedx_part'
+    ntupletag = 'withdedx'
     model = os.path.abspath(f'models/output_{modeltag}/model.onnx')
     preprocess = model.replace('model.onnx', 'preprocess.json')
-    #outputdir = f'output_scores_model_{modeltag}'
-    outputdir = f'output_scores_model_20260205_withsvloose_for_withdmerge'
+    outputdir = f'output_scores_model_{modeltag}'
+    #outputdir = f'output_scores_model_20260205_withsvloose_for_withdmerge'
     runmode = 'local'
     resubmit = True
     ntuplename = f'ntuples-{ntupletag}' if ntupletag is not None else 'ntuples'
@@ -73,6 +73,7 @@ if __name__=='__main__':
 
     # test mode
     if test:
+        print('WARNING: test mode is set to True.')
         cmds = [cmds[0]]
         runmode = 'local'
 

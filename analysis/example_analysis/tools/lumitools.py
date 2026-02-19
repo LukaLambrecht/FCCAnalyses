@@ -10,3 +10,11 @@ def get_lumidict():
       "1994": 57.894 # calculated from input files (with SICAL lumi)
     }
     return lumidict
+
+def get_sqrtsdict():
+    # note: units are GeV
+
+    sqrtsdict = {
+        "1994": 91.2
+    }
+    return sqrtsdict

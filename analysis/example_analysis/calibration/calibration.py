@@ -196,8 +196,9 @@ if __name__=='__main__':
     #(tag_idx, probe_idx) = (1, 0) # to see if it makes a difference
     tag_selections = {
         'b': f'Jets_score_isB[:, {tag_idx}] > 0.9',
-        'c': f'(Jets_score_isC[:, {tag_idx}] > 0.7)',
-        'light': f'Jets_score_isUDSG[:, {tag_idx}] > 0.5',
+        'c': f'Jets_score_isC[:, {tag_idx}] > 0.7',
+        's': f'Jets_score_isS[:, {tag_idx}] > 0.5',
+        'ud': f'Jets_score_isUDG[:, {tag_idx}] > 0.5',
     }
 
     # make masks
@@ -245,10 +246,16 @@ if __name__=='__main__':
             "axtitle": "Probe jet classifier c score"
         }),
         HistogramVariable.fromdict({
-            "name": "score_isUDSG",
-            "variable": f"Jets_score_isUDSG[:, {probe_idx}]",
+            "name": "score_isS",
+            "variable": f"Jets_score_isS[:, {probe_idx}]",
             "bins": np.linspace(0, 1, num=51),
-            "axtitle": "Probe jet classifier udsg score"
+            "axtitle": "Probe jet classifier s score"
+        }),
+        HistogramVariable.fromdict({
+            "name": "score_isUDG",
+            "variable": f"Jets_score_isUDG[:, {probe_idx}]",
+            "bins": np.linspace(0, 1, num=51),
+            "axtitle": "Probe jet classifier udg score"
         })
     ]
     weights = {'qqb': ['weight']}

@@ -272,9 +272,11 @@ if __name__=='__main__':
 
     # make color dict
     colordict = {}
-    colordict['q'] = 'deepskyblue'
-    colordict['light'] = 'lightskyblue'
-    colordict['c'] = 'deepskyblue'
+    colordict['q'] = 'grey'
+    colordict['light'] = 'grey'
+    colordict['ud'] = 'paleturquoise'
+    colordict['s'] = 'lightskyblue'
+    colordict['c'] = 'slateblue'
     colordict['b'] = 'darkorchid'
 
     # make label dict
@@ -283,7 +285,8 @@ if __name__=='__main__':
         labeldict[p] = p
     labeldict['b'] = r'$b$-jets'
     labeldict['c'] = r'$c$-jets'
-    labeldict['light'] = r'$u$-, $d$-, $s$-jets'
+    labeldict['s'] = r'$s$-jets'
+    labeldict['ud'] = r'$u$-, $d$-jets'
 
     # set histogram styles and stacking
     styledict = {}
@@ -385,6 +388,7 @@ if __name__=='__main__':
             # set y-axis title
             yaxtitle = 'Jets'
             if variable.variable.startswith('pfcand_'): yaxtitle = 'Jet contituents'
+            if variable.variable.startswith('sv_'): yaxtitle = 'Secondary vertices'
             if normalize: yaxtitle += ' (normalized)'
 
             # do plotting
@@ -407,9 +411,9 @@ if __name__=='__main__':
 
             # some more plot aesthetics
             axs[0].set_ylim((0, axs[0].get_ylim()[1]*1.2))
-            axs[0].legend(loc='upper right', fontsize=15)
+            axs[0].legend(loc='upper right', fontsize=17, ncols=1)
             if len(regions.keys())>1:
-                axs[0].text(0.05, 0.9, region_name, ha='left', va='top', fontsize=12,
+                axs[0].text(0.05, 0.9, region_name, ha='left', va='top', fontsize=15,
                     transform=axs[0].transAxes)
             #if event_selection_name is not None:
             #    label = event_selection_name
@@ -418,7 +422,7 @@ if __name__=='__main__':
             #    axs[0].text(0.05, 0.85, label, ha='left', va='top', fontsize=12,
             #      transform=axs[0].transAxes)
             if args.normalizesim:
-                axs[0].text(0.05, 0.8, 'Simulation normalized to data', ha='left', va='top', fontsize=12,
+                axs[0].text(0.05, 0.8, 'Simulation normalized to data', ha='left', va='top', fontsize=15,
                   transform=axs[0].transAxes)
             # data ratio pad
             #if datatag is not None: axs[1].set_ylim((0, 2))
@@ -458,9 +462,9 @@ if __name__=='__main__':
                     if not normalize: ymin = np.min(histarray[np.nonzero(histarray)])
                     else: ymin = axs[0].get_ylim()[0]
                     axs[0].set_ylim((ymin, axs[0].get_ylim()[1]**1.2))
-                axs[0].legend(loc='upper right', fontsize=15)
+                axs[0].legend(loc='upper right', fontsize=17, ncols=1)
                 if len(regions.keys())>1:
-                    axs[0].text(0.05, 0.9, region_name, ha='left', va='top', fontsize=12,
+                    axs[0].text(0.05, 0.9, region_name, ha='left', va='top', fontsize=15,
                         transform=axs[0].transAxes)
                 #if event_selection_name is not None:
                 #    label = event_selection_name
@@ -469,7 +473,7 @@ if __name__=='__main__':
                 #    axs[0].text(0.05, 0.85, label, ha='left', va='top', fontsize=12,
                 #      transform=axs[0].transAxes)
                 if args.normalizesim:
-                    axs[0].text(0.05, 0.8, 'Simulation normalized to data', ha='left', va='top', fontsize=12,
+                    axs[0].text(0.05, 0.8, 'Simulation normalized to data', ha='left', va='top', fontsize=15,
                       transform=axs[0].transAxes)
                 # data ratio pad
                 #if datatag is not None: axs[1].set_ylim((0, 2))

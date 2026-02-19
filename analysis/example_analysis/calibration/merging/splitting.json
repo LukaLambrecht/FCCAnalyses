@@ -1,7 +1,0 @@
-{
-  "qqb": {
-    "light": "(genEventType>=1) & (genEventType<=3)",
-    "cc": "(genEventType==4)",
-    "bb": "(genEventType==5)"
-  }
-}

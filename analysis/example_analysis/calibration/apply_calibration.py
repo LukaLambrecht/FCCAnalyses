@@ -17,7 +17,7 @@ sys.path.append(topdir)
 from tools.variabletools import read_variables
 from tools.variabletools import HistogramVariable, DoubleHistogramVariable
 from tools.samplelisttools import read_samplelist, read_sampledict, find_files
-from tools.lumitools import get_lumidict
+from tools.lumitools import get_lumidict, get_sqrtsdict
 from tools.plottools import merge_events, merge_sampledict
 from analysis.eventselection import load_eventselection, get_variable_names
 from analysis.eventselection import get_selection_mask
@@ -43,6 +43,7 @@ if __name__=='__main__':
     parser.add_argument('--files_per_batch', default=None)
     parser.add_argument('--year', default=None)
     parser.add_argument('--luminosity', default=-1, type=float)
+    parser.add_argument('--sqrts', default=-1, type=float)
     parser.add_argument('--xsections', default=None)
     parser.add_argument('--merge', default=None)
     parser.add_argument('--split', default=None)
@@ -177,17 +178,26 @@ if __name__=='__main__':
     variablelist = sum([get_variable_names(v) for v in variablelist], [])
     variablelist = list(set(variablelist))
 
-    # get luminosity from year
+    # get luminosity and center-of-mass energy from year
     luminosity = args.luminosity
+    sqrts = args.sqrts
     if args.year is not None:
         lumi_from_year = get_lumidict()[args.year]
+        sqrts_from_year = get_sqrtsdict()[args.year]
         if args.luminosity is None or args.luminosity < 0:
             luminosity = lumi_from_year
         elif luminosity!=lumi_from_year:
             msg = f'WARNING: found inconsistency between provided luminosity ({luminosity})'
             msg += f' and the one corresponding to the provided year ({args.year}: {lumi_from_year}).'
             print(msg)
+        if args.sqrts is None or args.sqrts < 0:
+            sqrts = sqrts_from_year
+        elif sqrts!=sqrts_from_year:
+            msg = f'WARNING: found inconsistency between provided sqrt(s) ({sqrts})'
+            msg += f' and the one corresponding to the provided year ({args.year}: {sqrts_from_year}).'
+            print(msg)
     if luminosity < 0: luminosity = None
+    if sqrts < 0: sqrts = None
 
     # define variables to read
     branches_to_read = []
@@ -271,7 +281,7 @@ if __name__=='__main__':
                 #calibration_values_aggregated = calibration_values[:, 1].to_numpy() # alternative for testing
                 calibration_values_aggregated = np.clip(calibration_values_aggregated, a_min=0.5, a_max=2) # for testing
                 # make mask where to apply these
-                mapping = {'b': 'bb', 'c': 'cc', 'light': 'light'}
+                mapping = {'b': 'bb', 'c': 'cc', 's': 'ss', 'ud': 'uudd'}
                 mask_selection = splitdict[process_key][mapping[key]]
                 mask = get_selection_mask(this_events, mask_selection)
                 calibration_weights = np.where(mask, calibration_values_aggregated, calibration_weights)
@@ -327,7 +337,9 @@ if __name__=='__main__':
     if args.year is not None:
         lumiheaderparts.append(args.year)
     if luminosity is not None:
-        lumiheaderparts.append('{:.2f}'.format(luminosity) + ' pb$^{-1}$')
+        lumiheaderparts.append('{:.1f}'.format(luminosity) + ' pb$^{-1}$')
+    if sqrts is not None:
+        lumiheaderparts.append('{:.1f}'.format(sqrts) + ' GeV')
     lumiheader = ', '.join(lumiheaderparts)
 
     # plotting loop (histograms before calibration)
