@@ -29,6 +29,11 @@ if __name__=='__main__':
     print('Background efficiency:')
     print(efficiency_bkg)
 
+    # write to csv file
+    data = {'sig_eff': efficiency_sig, 'bkg_eff': efficiency_bkg}
+    outdf = pd.DataFrame(data)
+    outdf.to_csv('roc.csv')
+
     # make plot of score distribution
     fig, ax = plt.subplots()
     ax.stairs(sig_counts, label='Signal', color='g', linewidth=2)

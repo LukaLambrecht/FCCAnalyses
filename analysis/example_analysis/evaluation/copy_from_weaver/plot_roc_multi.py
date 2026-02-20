@@ -5,6 +5,7 @@ import sys
 import json
 import argparse
 import numpy as np
+import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score
@@ -105,7 +106,9 @@ def plot_scores_multi(events,
 def plot_roc_multi(events,
             signal_categories,
             background_categories,
-            outputdir = None):
+            outputdir = None,
+            doRb = False,
+            doAFB = False):
 
     # check arguments
     all_categories = {**signal_categories, **background_categories}
@@ -114,7 +117,13 @@ def plot_roc_multi(events,
     masks = {}
     for category_name, category_settings in all_categories.items():
         branch = category_settings['label_branch']
-        mask = events[branch].astype(bool)
+        if '|' in branch:
+            # simple ad-hoc parsing of complex labels
+            parts = [part.strip(' ') for part in branch.split('|')]
+            mask = np.zeros(len(events[parts[0]])).astype(bool)
+            for part in parts: mask = ((mask) | (events[part].astype(bool)))
+        else:
+            mask = events[branch].astype(bool)
         masks[category_name] = mask
 
     # make output directory
@@ -123,9 +132,20 @@ def plot_roc_multi(events,
 
     # initialize figure
     fig, ax = plt.subplots()
+
+    # initialize colors (automatic)
     nlines = int(len(all_categories)*(len(all_categories)-1)/2)
     cmap = plt.get_cmap('cool', nlines)
     cidx = 0
+
+    # initialize colors (ad hoc, hard-coded)
+    cmap = {}
+    cmap[('b', 'c')] = 'darkorchid'
+    cmap[('b', 'uds')] = 'crimson'
+    cmap[('b', 'udsc')] = 'mediumvioletred'
+    cmap[('c', 'uds')] = 'dodgerblue'
+    #cmap[('s', 'udcb')] = 
+    #cmap[('s', 'ud')] = 
 
     # initialize a table
     table = {}
@@ -184,8 +204,10 @@ def plot_roc_multi(events,
                 label = signal_category_settings['label'] + ' vs. '
                 label += background_category_settings['label']
                 label += ' (AUC: {:.2f})'.format(auc)
+                #color = cmap(cids)
+                color = cmap[(signal_category_name, background_category_name)]
                 ax.plot(efficiency_bkg, efficiency_sig,
-                  color=cmap(cidx), linewidth=3, label=label)
+                  color=color, linewidth=3, label=label)
                 cidx += 1
 
                 # make a table entry
@@ -198,15 +220,27 @@ def plot_roc_multi(events,
                 label += background_category_settings['label']
                 table[label] = table_entry
 
+    # ad-hoc addition (maybe clean up later):
+    # add Rb reference
+    if doRb:
+        ax.scatter(0.00216, 0.1957, s=40, color=cmap[('b', 'c')], edgecolor=None, label='$b$-jets vs. $c$-jets (ALEPH)')
+        ax.scatter(0.00043, 0.1957, s=40, color=cmap[('b', 'uds')], edgecolors=None, label='$b$-jets vs. $uds$-jets (ALEPH)')
+
+    # ad-hoc addition (maybe clean up later):
+    # add A_FB reference
+    if doAFB:
+        # read file (hard-coded for now)
+        filepath = '../../purity/digitized_roc_curve/roc.csv'
+        df = pd.read_csv(filepath)
+        sig_eff = df['sig_eff'].values[:-1]
+        bkg_eff = df['bkg_eff'].values[:-1]
+        ax.plot(bkg_eff, sig_eff, color=cmap[('b', 'udsc')], linewidth=2, linestyle='dotted', label='$b$-jets vs. $udsc$-jets (ALEPH)')
+        print('AFB not yet implemented')
+
     # add random guessing line
     dummy_efficiency = np.linspace(0, 1, num=101)
     ax.plot(dummy_efficiency, dummy_efficiency,
       color='darkblue', linewidth=3, linestyle='--', label='Random guessing')
-
-    # ad-hoc addition (maybe clean up later):
-    # add reference
-    ax.scatter(0.00216, 0.1957, s=35, color=cmap(0), edgecolors='red', label='$b$-jets vs. $c$-jets (ALEPH)')
-    ax.scatter(0.00043, 0.1957, s=35, color=cmap(1), edgecolors='red', label='$b$-jets vs. $uds$-jets (ALEPH)')
 
     # other plot settings
     ax.set_xlabel('Background pass-through', fontsize=22)
