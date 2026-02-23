@@ -239,13 +239,16 @@ class RDFanalysis():
         # for Aleph simulation, the collections EFlowTrack, EFlowTrack_1 and EFlowTrack_2 do not seem to exist,
         # so we need to alias them with other collections.
         # note: the alias for EFlowTrack_2 has not yet been validated, no guarantee that it is correct.
+        # note: there are also some modification that need to be made to the Aleph track states:
+        #       - flip the sign of D0 and omega (at least so it seems; under investigation)
+        #       - unit conversion from cm to mm (this is currently still hard-coded in my branch of FCCAnalyses)
         if det=='aleph':
             dfout = (
                 dfout
 
                 .Alias("EFlowTrack", "Tracks")
                 # (must be an object of type ROOT::VecOps::RVec<edm4hep::TrackData>)
-                .Alias("EFlowTrack_1", "_Tracks_trackStates")
+                .Define("EFlowTrack_1", "TrackTools::getModifiedTrackStates(_Tracks_trackStates)")
                 # (must be an object of type ROOT::VecOps::RVec<edm4hep::TrackState>)
                 .Define("EFlowTrack_2", "1.0 / ReconstructedParticle::get_p(ReconstructedParticles)")
                 # (must be an object of type rv::RVec<edm4hep::Quantity>)

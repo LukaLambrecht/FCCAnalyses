@@ -16,6 +16,26 @@
 
 namespace TrackTools{
 
+// get a collection of track states with some track parameters modified
+ROOT::VecOps::RVec<edm4hep::TrackState>
+getModifiedTrackStates(const ROOT::VecOps::RVec<edm4hep::TrackState>& tracks) {
+    ROOT::VecOps::RVec<edm4hep::TrackState> out;
+    out.reserve(tracks.size());
+    for (const auto &track : tracks) {
+        edm4hep::TrackState newtrack = track;
+
+        // flip sign of D0 and omega
+        newtrack.D0 = -newtrack.D0;
+        newtrack.omega = -newtrack.omega;
+
+        // propagate changes to covariance matrix
+        // not yet implemented
+
+        out.push_back(std::move(newtrack));
+    }
+    return out;
+}
+
 // get the set complement for a collection of tracks
 ROOT::VecOps::RVec<edm4hep::TrackState>
 get_complement(ROOT::VecOps::RVec<edm4hep::TrackState> allTracks,

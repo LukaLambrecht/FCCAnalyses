@@ -17,6 +17,9 @@ ROOT.gInterpreter.Declare(f'#include "{analyzer_path}"')
 analyzer_path = os.path.join(os.path.dirname(__file__), analyzers_dir, 'analyzer_recotomctools.cxx')
 ROOT.gInterpreter.Declare(f'#include "{analyzer_path}"')
 
+# load custom analyzer with collections of tracks
+analyzer_path = os.path.join(os.path.dirname(__file__), 'analyzers', 'analyzer_tracktools.cxx')
+ROOT.gInterpreter.Declare(f'#include "{analyzer_path}"')
 
 # main analyzer class
 class RDFanalysis():
@@ -54,7 +57,7 @@ class RDFanalysis():
 
                 .Alias("EFlowTrack", "Tracks")
                 # (must be an object of type ROOT::VecOps::RVec<edm4hep::TrackData>)
-                .Alias("EFlowTrack_1", "_Tracks_trackStates")
+                .Alias("EFlowTrack_1", "TrackTools::getModifiedTrackStates(_Tracks_trackStates)")
                 # (must be an object of type ROOT::VecOps::RVec<edm4hep::TrackState>)
                 .Define("EFlowTrack_2", "1.0 / ReconstructedParticle::get_p(ReconstructedParticles)")
                 # (must be an object of type rv::RVec<edm4hep::Quantity>)

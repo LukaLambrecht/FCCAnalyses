@@ -298,10 +298,9 @@ namespace ReconstructedParticle2Track{
 	        double pt = sqrt(p.momentum.x * p.momentum.x + p.momentum.y * p.momentum.y);
             double omega = trst.omega;
             if( detector=="aleph" ){
-                omega *= -0.1;
+                omega *= 0.1;
                 // extra numerical factor needed for Aleph data
-                // (because of the curvature being expressed in 1/cm instead of 1/mm,
-                // and apparently also flipped sign convention).
+                // (because of the curvature being expressed in 1/cm instead of 1/mm)
             }
 	        double Bz = omega / cSpeed * pt * std::copysign(1.0, p.charge);
 	        out.push_back(Bz);
@@ -335,10 +334,9 @@ namespace ReconstructedParticle2Track{
       double pt = sqrt(p.momentum.x * p.momentum.x + p.momentum.y * p.momentum.y);
       double omega = trst.omega;
       if( detector=="aleph" ){
-        omega *= -0.1;
+        omega *= 0.1;
         // extra numerical factor needed for Aleph data
-        // (because of the curvature being expressed in 1/cm instead of 1/mm,
-        // and apparently also flipped sign convention).
+        // (because of the curvature being expressed in 1/cm instead of 1/mm)
       }
       Bz = omega / cSpeed * pt * std::copysign(1.0, p.charge);
       // break after the first particle with valid result
@@ -371,12 +369,9 @@ namespace ReconstructedParticle2Track{
       if(trackIndex < trackStates.size()){
         edm4hep::TrackState trst = trackStates.at(trackIndex);
 
-        // note: extra sign flip for D0 seems to be needed for Aleph data
         float D0_wrt0 = trst.D0;
-        if( detector=="aleph" ){ D0_wrt0 *= -1; }
         float Z0_wrt0 = trst.Z0;
         float phi0_wrt0 = trst.phi;
-        float omega = trst.omega;
 
         // note: phi0 is not the position vector azimuth,
         // but the azimuth of the momentum vector at the point of closest approach!
@@ -390,7 +385,6 @@ namespace ReconstructedParticle2Track{
             // extra numerical factor for aleph, see Bz calculation
             a *= -10;
         }
-        //double a = - omega * pt; // alternative
         double r2 = x(0) * x(0) + x(1) * x(1);
         double cross = x(0) * p(1) - x(1) * p(0);
         double D=-9;
@@ -425,12 +419,9 @@ namespace ReconstructedParticle2Track{
       if(trackIndex < trackStates.size()){
         edm4hep::TrackState trst = trackStates.at(trackIndex);
 
-        // note: extra sign flip for D0 seems to be needed for Aleph data
         float D0_wrt0 = trst.D0;
-        if( detector=="aleph" ){ D0_wrt0 *= -1; }
         float Z0_wrt0 = trst.Z0;
         float phi0_wrt0 = trst.phi;
-        float omega = trst.omega;
 
         // note: phi0 is not the position vector azimuth,
         // but the azimuth of the momentum vector at the point of closest approach!
@@ -444,7 +435,6 @@ namespace ReconstructedParticle2Track{
             // extra numerical factor for aleph, see Bz calculation
             a *= -10;
         }
-        //double a = - omega * pt;
         double C = a/(2 * pt);
         double r2 = x(0) * x(0) + x(1) * x(1);
         double cross = x(0) * p(1) - x(1) * p(0);
@@ -486,12 +476,9 @@ namespace ReconstructedParticle2Track{
       if(trackIndex < trackStates.size()){
         edm4hep::TrackState trst = trackStates.at(trackIndex);
 
-        // note: extra sign flip for D0 seems to be needed for Aleph data
         float D0_wrt0 = trst.D0;
-        if( detector=="aleph" ){ D0_wrt0 *= -1; }
         float Z0_wrt0 = trst.Z0;
         float phi0_wrt0 = trst.phi;
-        float omega = trst.omega;
 
         // note: phi0 is not the position vector azimuth,
         // but the azimuth of the momentum vector at the point of closest approach!
@@ -505,7 +492,6 @@ namespace ReconstructedParticle2Track{
             // extra numerical factor for aleph, see Bz calculation
             a *= -10;
         }
-        //double a = - omega * pt;
         double r2 = x(0) * x(0) + x(1) * x(1);
         double cross = x(0) * p(1) - x(1) * p(0);
         double T = TMath::Sqrt(pt * pt - 2 * a * cross + a * a * r2);
@@ -578,9 +564,7 @@ getRP2TRK_D0(ROOT::VecOps::RVec<edm4hep::ReconstructedParticleData> in,
   for (auto & p: in) {
     size_t trackIndex = getTrackIndex(p, reco2track_links);
     if (trackIndex < trackStates.size()){
-      // note: extra sign flip for D0 seems to be needed for Aleph data
       float D0_wrt0 = trackStates.at(trackIndex).D0;
-      if( detector=="aleph" ){ D0_wrt0 *= -1; }
       result.push_back(D0_wrt0);
     }
     else result.push_back(-9.);
@@ -611,9 +595,7 @@ getRP2TRK_D0_sig(ROOT::VecOps::RVec<edm4hep::ReconstructedParticleData> in,
   for (auto & p: in) {
     size_t trackIndex = getTrackIndex(p, reco2track_links);
     if (trackIndex < trackStates.size()){
-      // note: extra sign flip for D0 seems to be needed for Aleph data
       float D0_wrt0 = trackStates.at(trackIndex).D0;
-      if( detector=="aleph" ){ D0_wrt0 *= -1; }
       result.push_back(D0_wrt0/sqrt(trackStates.at(trackIndex).covMatrix[0]));
     }
     else result.push_back(-9.);
@@ -701,7 +683,6 @@ getRP2TRK_omega(ROOT::VecOps::RVec<edm4hep::ReconstructedParticleData> in,
     size_t trackIndex = getTrackIndex(p, reco2track_links);
     if (trackIndex<trackStates.size()){
       float omega = trackStates.at(trackIndex).omega;
-      if( detector=="aleph" ){ omega *= -1; }
       result.push_back(omega);
     }
     else result.push_back(-9);

@@ -262,9 +262,9 @@ std::array<float, 21> Delphes2Edm4hep_TrackCovMatrix(const TMatrixDSym &cov,
 }
 
 TVectorD get_trackParam(edm4hep::TrackState &atrack, bool Units_mm) {
-  double d0 = -atrack.D0; // sign flip for ALEPH
+  double d0 = atrack.D0;
   double phi0 = atrack.phi;
-  double omega = -atrack.omega; // sign flip for ALEPH
+  double omega = atrack.omega;
   double z0 = atrack.Z0;
   double tanlambda = atrack.tanLambda;
   TVectorD param(5);

@@ -42,10 +42,10 @@ class Helix {
     public:
 
     explicit Helix(const edm4hep::TrackState& trackState){
-        d0 = -trackState.D0; // extra sign flip for aleph
+        d0 = trackState.D0;
         z0 = trackState.Z0;
         phi0 = trackState.phi;
-        omega = -trackState.omega; // extra sign flip for aleph
+        omega = trackState.omega;
         tanL = trackState.tanLambda;
         
         straight = std::abs(omega) < 1e-12;
@@ -225,9 +225,9 @@ TMatrixD getPositionJacobianMatrix(const edm4hep::TrackState& trackState, double
     TMatrixD J(3,5);
 
     // Track parameters
-    const double d0 = -trackState.D0; // extra sign flip for aleph
+    const double d0 = trackState.D0;
     const double phi = trackState.phi;
-    const double omega = -trackState.omega; // extra sign flip for aleph
+    const double omega = trackState.omega;
     const double z0 = trackState.Z0;
     const double tanL = trackState.tanLambda;
 
