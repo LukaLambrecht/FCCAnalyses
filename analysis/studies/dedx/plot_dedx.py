@@ -20,6 +20,7 @@ if __name__=='__main__':
     inputfiles = sys.argv[1:]
     treename = 'events'
     outputdir = 'output_plots'
+    isdata = ('output_data' in inputfiles[0]) # to make more robust
 
     variables = [
       'JetsConstituents_pt',
@@ -67,13 +68,18 @@ if __name__=='__main__':
         'muon': np.abs(events['JetsConstituents_pdgId'])==13,
         'electron': np.abs(events['JetsConstituents_pdgId'])==11
     }
+    if isdata:
+        categories = {
+            'data': np.ones(len(events)).astype(bool)
+        }
 
     labeldict = {
         'pion': r'$\pi$',
         'kaon': r'$K$',
         'proton': r'$p$',
         'muon': r'$\mu$',
-        'electron': r'$e$'
+        'electron': r'$e$',
+        'data': 'Data'
     }
 
     colordict = {
@@ -81,7 +87,8 @@ if __name__=='__main__':
         'kaon': 'darkorchid',
         'proton': 'red',
         'muon': 'dodgerblue',
-        'electron': 'darkturquoise'
+        'electron': 'darkturquoise',
+        'data': 'mediumblue'
     }
 
     # loop over pads and wires
@@ -152,9 +159,19 @@ if __name__=='__main__':
 
         # optional: add parametrizations
         paxis = np.logspace(-1, 2, num=100)
-        for category_label in category_data.keys():
-            y = get_parametrized_curve(paxis, species=category_label, subsystem=system)
-            ax.plot(paxis, y, color=colordict[category_label])
+        if isdata:
+            for category_label in labeldict.keys():
+                if category_label=='data': continue
+                y = get_parametrized_curve(paxis, species=category_label, subsystem=system)
+                #color = colordict[category_label]
+                color = 'black'
+                ax.plot(paxis, y, color=color)
+        else:
+            for category_label in category_data.keys():
+                y = get_parametrized_curve(paxis, species=category_label, subsystem=system)
+                #color = colordict[category_label]
+                color = 'black'
+                ax.plot(paxis, y, color=color)
 
         # plot aesthetics
         ax.set_ylabel('dE/dx (normalized to MIPs)', fontsize=17)

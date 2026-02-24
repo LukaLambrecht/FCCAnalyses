@@ -98,8 +98,8 @@ if __name__=='__main__':
         alldata = np.concatenate(list(data.values()))
         #xmin = np.quantile(alldata, 0.01)
         #xmax = np.quantile(alldata, 0.99)
-        xmin = -0.02
-        xmax = 0.02
+        xmin = -0.05
+        xmax = 0.05
         bins = np.linspace(xmin, xmax, num=51)
 
         # clip outliers

@@ -30,52 +30,14 @@ def get_track_curve(d0, z0, phi0, omega, tanlambda, s):
     return ( (x, y, z), (x0, y0, z0), direction )
 
 
-if __name__=='__main__':
-
-    # settings
-    inputfile = sys.argv[1]
-    eventidx = int(sys.argv[2])
-    trackids = [int(el.strip(' ')) for el in sys.argv[3].split(',')]
-    sposrange = 5
-    snegrange = 0
-    #xlim = (-0.07, 0.07)
-    #ylim = (-0.07, 0.07)
-    xlim = (-3, 3)
-    ylim = (-3, 3)
-    zlim = None
-    zlim = (-3, 3)
-
-    # set branches to read
-    branches_to_read = [
-        'GenParticle_px',
-        'GenParticle_py',
-        'GenParticle_pz',
-        'GenParticle_x',
-        'GenParticle_y',
-        'GenParticle_z',
-
-        'Tracks_d0',
-        'Tracks_z0',
-        'Tracks_phi0',
-        'Tracks_omega',
-        'Tracks_tanlambda',
-
-        'TrackToMCMap'
-    ]
-
-    # read input files
-    treename = 'events'
-    readstr = ':'.join([inputfile, treename])
-    with uproot.open(readstr) as f:
-        events = f.arrays(branches_to_read, entry_start=eventidx, entry_stop=eventidx+1)
-    print(f'Read {len(events)} entries.')
-
+def get_track_data_from_event(event, sposrange=1, snegrange=0):
+    
     # get track parameters
-    d0 = np.squeeze(events['Tracks_d0'].to_numpy())
-    z0 = np.squeeze(events['Tracks_z0'].to_numpy())
-    phi0 = np.squeeze(events['Tracks_phi0'].to_numpy())
-    omega = np.squeeze(events['Tracks_omega'].to_numpy())
-    tanlambda = np.squeeze(events['Tracks_tanlambda'].to_numpy())
+    d0 = np.squeeze(event['Tracks_d0'].to_numpy())
+    z0 = np.squeeze(event['Tracks_z0'].to_numpy())
+    phi0 = np.squeeze(event['Tracks_phi0'].to_numpy())
+    omega = np.squeeze(event['Tracks_omega'].to_numpy())
+    tanlambda = np.squeeze(event['Tracks_tanlambda'].to_numpy())
 
     # make parametric curves for tracks
     track_data = []
@@ -107,16 +69,23 @@ if __name__=='__main__':
             'refpoint_direction': refpoint_direction
         })
 
+    return track_data
+
+
+def get_genpart_data_from_event(event, sposrange=1):
+    
     # get gen particle parameters
-    genpart_x = np.squeeze(events['GenParticle_x'].to_numpy())
-    genpart_y = np.squeeze(events['GenParticle_y'].to_numpy())
-    genpart_z = np.squeeze(events['GenParticle_z'].to_numpy())
-    genpart_px = np.squeeze(events['GenParticle_px'].to_numpy())
-    genpart_py = np.squeeze(events['GenParticle_py'].to_numpy())
-    genpart_pz = np.squeeze(events['GenParticle_pz'].to_numpy())
+    genpart_x = np.squeeze(event['GenParticle_x'].to_numpy())
+    genpart_y = np.squeeze(event['GenParticle_y'].to_numpy())
+    genpart_z = np.squeeze(event['GenParticle_z'].to_numpy())
+    genpart_px = np.squeeze(event['GenParticle_px'].to_numpy())
+    genpart_py = np.squeeze(event['GenParticle_py'].to_numpy())
+    genpart_pz = np.squeeze(event['GenParticle_pz'].to_numpy())
+    genpart_pdgid = np.squeeze(event['GenParticle_pdgId'].to_numpy())
 
     # make parametric curves for gen particles
     genpart_data = []
+    spos = np.linspace(0, sposrange, num=100)
     for genpart_idx in range(len(genpart_px)):
 
             # get parameters for this genpart
@@ -126,6 +95,7 @@ if __name__=='__main__':
             this_px = genpart_px[genpart_idx]
             this_py = genpart_py[genpart_idx]
             this_pz = genpart_pz[genpart_idx]
+            this_pdgid = genpart_pdgid[genpart_idx]
 
             # get genpart line
             genpart_coords = (
@@ -133,14 +103,61 @@ if __name__=='__main__':
                 this_y + spos * this_py,
                 this_z + spos * this_pz
             )
-        
+
             # add results to list
             genpart_data.append({
                 'genpart_idx': genpart_idx,
                 'genpart_coords': genpart_coords,
+                'genpart_pdgid': this_pdgid,
+                'refpoint_coords': (this_x, this_y, this_z)
             })
 
-    # get links
+    return genpart_data
+
+
+if __name__=='__main__':
+
+    # settings
+    inputfile = sys.argv[1]
+    eventidx = int(sys.argv[2])
+    trackids = [int(el.strip(' ')) for el in sys.argv[3].split(',')]
+    sposrange = 5
+    snegrange = 0
+    #xlim = (-0.07, 0.07)
+    #ylim = (-0.07, 0.07)
+    xlim = (-3, 3)
+    ylim = (-3, 3)
+    zlim = None
+    zlim = (-3, 3)
+
+    # set branches to read
+    branches_to_read = [
+        'GenParticle_px',
+        'GenParticle_py',
+        'GenParticle_pz',
+        'GenParticle_x',
+        'GenParticle_y',
+        'GenParticle_z',
+        'GenParticle_pdgId',
+
+        'Tracks_d0',
+        'Tracks_z0',
+        'Tracks_phi0',
+        'Tracks_omega',
+        'Tracks_tanlambda',
+
+        'TrackToMCMap'
+    ]
+
+    # read input files
+    treename = 'events'
+    readstr = ':'.join([inputfile, treename])
+    with uproot.open(readstr) as f:
+        events = f.arrays(branches_to_read, entry_start=eventidx, entry_stop=eventidx+1)
+    print(f'Read {len(events)} entries.')
+
+    track_data = get_track_data_from_event(events, sposrange=sposrange, snegrange=snegrange)
+    genpart_data = get_genpart_data_from_event(events, sposrange=sposrange)
     tracktomc = np.squeeze(events['TrackToMCMap'].to_numpy())
     genpartids = [tracktomc[trackidx] for trackidx in trackids]
 

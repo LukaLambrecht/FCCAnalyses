@@ -41,6 +41,43 @@ ROOT::VecOps::RVec<int> makeTrackToMCMapping(
     return trackToMCMap;
 }
 
+// Get MC particle index for each reconstructed particle
+// Note: for ALEPH data, there exists a direct link between tracks and MC particles
+//       but neutral reco particles do not seem to have something like that,
+//       so these are given a dummy value.
+ROOT::VecOps::RVec<int> get_genParticleIndex(
+        const ROOT::VecOps::RVec<edm4hep::ReconstructedParticleData>& rps,
+        const ROOT::VecOps::RVec<edm4hep::TrackData>& tracks,
+        const ROOT::VecOps::RVec<edm4hep::MCParticleData>& genParticles,
+        const ROOT::VecOps::RVec<podio::ObjectID>& reco2track_links,
+        const ROOT::VecOps::RVec<int>& trackToMCMap){
+
+    // initializations
+    ROOT::VecOps::RVec<int> result;
+
+    // loop over reco particles
+    for(auto & rp: rps){
+
+        // find track
+        if(rp.tracks_begin < reco2track_links.size()){
+            const auto &oid = reco2track_links.at(rp.tracks_begin);
+            size_t trackIndex = oid.index;
+            if(trackIndex < tracks.size()){
+                // find gen particle index
+                size_t genIndex = trackToMCMap.at(trackIndex);
+                if(genIndex < genParticles.size()){
+                    result.push_back(genIndex);
+                }
+                else{ result.push_back(-1); }
+            }
+            else{ result.push_back(-1); }
+        }
+        else{ result.push_back(-1); }
+    }
+    return result;
+}
+
+
 // Get MC particle PDG ID for each reconstructed particle
 // Note: for ALEPH data, there exists a direct link between tracks and MC particles
 //       but neutral reco particles do not seem to have something like that,
@@ -55,23 +92,21 @@ ROOT::VecOps::RVec<int> get_pdgid(
     // initializations
     ROOT::VecOps::RVec<int> result;
 
+    // get gen particle indices for each reco particle
+    ROOT::VecOps::RVec<int> genParticleIndices = get_genParticleIndex(
+        rps,
+        tracks,
+        genParticles,
+        reco2track_links,
+        trackToMCMap
+    );
+
     // loop over reco particles
-    for(auto & rp: rps){
-        
-        // find track
-        if(rp.tracks_begin < reco2track_links.size()){
-            const auto &oid = reco2track_links.at(rp.tracks_begin);
-            size_t trackIndex = oid.index;
-            if(trackIndex < tracks.size()){
-                // find gen particle
-                size_t genIndex = trackToMCMap.at(trackIndex);
-                if(genIndex < genParticles.size()){
-                    const edm4hep::MCParticleData genParticle = genParticles.at(genIndex);
-                    result.push_back(genParticle.PDG);
-                }
-                else{ result.push_back(0); }
-            }
-            else{ result.push_back(0); }
+    for(unsigned int reco_idx = 0; reco_idx < rps.size(); reco_idx++){
+        int gen_idx = genParticleIndices.at(reco_idx);
+        if(gen_idx >= 0 && gen_idx < genParticles.size()){
+            const edm4hep::MCParticleData genParticle = genParticles.at(gen_idx);
+            result.push_back(genParticle.PDG);
         }
         else{ result.push_back(0); }
     }
