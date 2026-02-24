@@ -28,8 +28,13 @@ getModifiedTrackStates(const ROOT::VecOps::RVec<edm4hep::TrackState>& tracks) {
         newtrack.D0 = -newtrack.D0;
         newtrack.omega = -newtrack.omega;
 
-        // propagate changes to covariance matrix
-        // not yet implemented
+        // propagate sign flip of D0 and omega to covariance matrix
+        newtrack.covMatrix[1]  = -newtrack.covMatrix[1]; // cov(D0, phi)
+        newtrack.covMatrix[4]  = -newtrack.covMatrix[4]; // cov(phi, omega)
+        newtrack.covMatrix[6]  = -newtrack.covMatrix[6]; // cov(D0, z0)
+        newtrack.covMatrix[8]  = -newtrack.covMatrix[8]; // cov(omega, z0)
+        newtrack.covMatrix[10] = -newtrack.covMatrix[10]; // cov(D0, tanLambda)
+        newtrack.covMatrix[12] = -newtrack.covMatrix[12]; // cov(omega, tanLambda)
 
         out.push_back(std::move(newtrack));
     }
