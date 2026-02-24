@@ -484,9 +484,9 @@ class RDFanalysis():
             # find tracks incompatible with the primary vertex (both per event and per jet).
             # note: primary tracks have already been defined before (when calculating the primary vertex),
             #       but an alternative set is re-calculated here, possibly with a tighter chi2 cut.
-            .Define("PrimaryTracks2", "PrimaryVertexTools::getPrimaryTracks(SelectedTracks, 5., Beamspot_x, Beamspot_y, Beamspot_z)")
-            .Define("SecondaryTracks", "TrackTools::getSecondaryTracks(SelectedTracks, PrimaryTracks2)")
-            .Define("SecondaryTracksPerJet", "TrackTools::getSecondaryTracks(SelectedTracksPerJet, PrimaryTracks2)")
+            #.Define("PrimaryTracks2", "PrimaryVertexTools::getPrimaryTracks(SelectedTracks, 5., Beamspot_x, Beamspot_y, Beamspot_z)")
+            .Define("SecondaryTracks", "TrackTools::getSecondaryTracks(SelectedTracks, PrimaryTracks)")
+            .Define("SecondaryTracksPerJet", "TrackTools::getSecondaryTracks(SelectedTracksPerJet, PrimaryTracks)")
 
             # store counters
             .Define("Event_nSecondaryTracks", "SecondaryTracks.size()")
