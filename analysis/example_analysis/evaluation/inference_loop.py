@@ -1,5 +1,6 @@
 import os
 import sys
+import six
 import glob
 
 thisdir = os.path.abspath(os.path.dirname(__file__))
@@ -13,7 +14,7 @@ import tools.slurmtools as st
 if __name__=='__main__':
 
     # settings
-    modeltag = '20260217_withstrange_withdedx_part'
+    modeltag = '20260221_withstrange_withdedx_noptype_part'
     ntupletag = 'withdedx'
     model = os.path.abspath(f'models/output_{modeltag}/model.onnx')
     preprocess = model.replace('model.onnx', 'preprocess.json')
@@ -36,6 +37,10 @@ if __name__=='__main__':
         inputfiles += glob.glob(pattern)
     print(f'Found {len(inputfiles)} files matching patterns.')
 
+    # find model
+    if not os.path.exists(model):
+        raise Exception(f'Model {model} does not exist.')
+
     # filter resubmission
     if resubmit:
         resubmit_files = []
@@ -46,6 +51,9 @@ if __name__=='__main__':
                 resubmit_files.append(inputfile)
         inputfiles = resubmit_files
         print(f'Found {len(inputfiles)} files for resubmission.')
+        print(f'Continue? (y/n)')
+        go = six.moves.input()
+        if go!='y': sys.exit()
 
     # loop over input files
     cmds = []
@@ -83,15 +91,12 @@ if __name__=='__main__':
             print(cmd)
             os.system(cmd)
     elif runmode=='condor':
-        miniforge = '/eos/user/l/llambrec/miniforge3/bin/activate'
-        conda_activate = f'source {miniforge}'
-        conda_env = f'weaver'
+        conda_activate = 'export PATH=/eos/user/l/llambrec/miniforge3/envs/weaver/bin:$PATH'
         ct.submitCommandsAsCondorCluster('cjob_inference', cmds,
-          jobflavour='workday', conda_activate=conda_activate, conda_env=conda_env)
+          jobflavour='workday', conda_activate=conda_activate)
     elif runmode=='slurm':
         env_cmds = ([
-          'source /blue/avery/llambre1.brown/miniforge3/bin/activate',
-          'conda activate weaver',
+          'export PATH=/blue/avery/llambre1.brown/miniforge3/envs/weaver/bin:$PATH',
           f'cd {thisdir}'
         ])
         slurmscript = 'sjob_inference.sh'

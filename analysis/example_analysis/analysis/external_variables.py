@@ -14,6 +14,8 @@ def read_external_variables(input_files, external_variable_dir):
     for input_file in input_files:
         tag = input_file.replace('/', '').replace('.root', '')
         external_variable_file = os.path.join(external_variable_dir, tag+'.pkl')
+        if not os.path.exists(external_variable_file):
+            raise Exception(f'Expected external variable file {external_variable_file} does not exist.')
         with open(external_variable_file, 'rb') as f:
             content = pickle.load(f)
         temp.append(content)

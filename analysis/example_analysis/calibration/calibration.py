@@ -270,18 +270,39 @@ if __name__=='__main__':
 
     # calculate ratios to store in output
     ratios = {}
+    process_of_interest = {
+        'b': 'bb',
+        'c': 'cc',
+        's': 'ss',
+        'ud': 'uudd'
+    }
     for region_name in tag_selections.keys():
         ratios[region_name] = {}
+        poi = process_of_interest.get(region_name, region_name)
         for variable in variables:
             region_variable_key = f'{region_name}_{variable.name}'
             counts_data = hists_combined['data'][region_variable_key]['data']['nominal'][0]
-            counts_sim = []
+            counts_sim_this = []
+            counts_sim_other = []
             for process_key in hists_combined['sim'][region_variable_key].keys():
-                counts_sim.append(hists_combined['sim'][region_variable_key][process_key]['nominal'][0])
-            counts_sim = sum(counts_sim)
-            counts_sim_clipped = np.clip(counts_sim, a_min=1, a_max=None)
+                counts = hists_combined['sim'][region_variable_key][process_key]['nominal'][0]
+                if process_key == poi: counts_sim_this.append(counts)
+                else: counts_sim_other.append(counts)
+            if len(counts_sim_this)!=1:
+                msg = f'Exactly one process of interest was expected, but found {len(counts_sim_this)}'
+                raise Exception(msg)
+            counts_sim_this = sum(counts_sim_this)
+            counts_sim_other = sum(counts_sim_other)
+            # original: just do data / total sim
+            numerator = np.clip(counts_data, a_min=0, a_max=None)
+            counts_sim_this += counts_sim_other
+            denominator = np.clip(counts_sim_this, a_min=1, a_max=None)
+            # alternative: do (data - other sim) / (this sim)
+            #numerator = np.clip(counts_data - counts_sim_other, a_min=0, a_max=None)
+            #denominator = np.clip(counts_sim_this, a_min=1, a_max=None)
+            # make ratio
             ratio = np.ones(len(counts_data))
-            ratio = np.where(counts_sim > 0, np.divide(counts_data, counts_sim_clipped), 1)
+            ratio = np.where(counts_sim_this > 0, np.divide(numerator, denominator), 1)
             ratios[region_name][variable.name] = ratio
 
     # write output file

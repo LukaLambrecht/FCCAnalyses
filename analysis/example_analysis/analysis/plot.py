@@ -160,8 +160,12 @@ def make_histograms(datastruct, variables,
                 # do extra object selection
                 if objectselection is not None:
                     print('Doing extra object selection...')
-                    events[process_key] = apply_objectselection(events[process_key],
-                                            objectselection[0], objectselection[1])
+                    if isinstance(objectselection, list): pass
+                    if isinstance(objectselection, tuple): objectselection = [objectselection]
+                    for this_objectselection in objectselection: 
+                        events[process_key] = apply_objectselection(events[process_key],
+                                                this_objectselection[0], 
+                                                this_objectselection[1])
 
                 # do extra event selection
                 if eventselection is not None:
@@ -350,8 +354,12 @@ def make_events(dtypedict,
             # do extra object selection
             if objectselection is not None:
                 print('Doing extra object selection...')
-                events[dtype][process_key] = apply_objectselection(events[dtype][process_key],
-                                               objectselection[0], objectselection[1])
+                if isinstance(objectselection, list): pass
+                if isinstance(objectselection, tuple): objectselection = [objectselection]
+                for this_objectselection in objectselection:
+                    events[dtype][process_key] = apply_objectselection(events[dtype][process_key],
+                                                    this_objectselection[0],
+                                                    this_objectselection[1])
 
             # do extra event selection
             if eventselection is not None:
@@ -552,7 +560,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
 
             # some more plot aesthetics
             axs[0].set_ylim((0, axs[0].get_ylim()[1]*1.4))
-            axs[0].legend(loc='upper right', fontsize=17, ncols=3)
+            axs[0].legend(loc='upper right', fontsize=17, ncols=1)
             #if len(regions.keys())>1:
             #    axs[0].text(0.05, 0.9, region_name, ha='left', va='top', fontsize=12,
             #        transform=axs[0].transAxes)
@@ -605,7 +613,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
                     if not normalize: ymin = np.min(histarray[np.nonzero(histarray)])
                     else: ymin = axs[0].get_ylim()[0]
                     axs[0].set_ylim((ymin, axs[0].get_ylim()[1]**1.4))
-                axs[0].legend(loc='upper right', fontsize=17, ncols=3)
+                axs[0].legend(loc='upper right', fontsize=17, ncols=1)
                 #if len(regions.keys())>1:
                 #    axs[0].text(0.05, 0.9, region_name, ha='left', va='top', fontsize=12,
                 #        transform=axs[0].transAxes)
@@ -640,7 +648,7 @@ if __name__=='__main__':
     parser.add_argument('-d', '--data', default=None, nargs='+')
     parser.add_argument('-v', '--variables', required=True, nargs='+')
     parser.add_argument('-o', '--outputdir', required=True)
-    parser.add_argument('--objectselection', default=None)
+    parser.add_argument('--objectselection', default=None, nargs='+')
     parser.add_argument('--eventselection', default=None)
     parser.add_argument('--select_processes', default=[], nargs='+')
     parser.add_argument('--regions', default=None)
@@ -681,11 +689,14 @@ if __name__=='__main__':
     # read extra object selection to apply
     objectselection = None
     if args.objectselection is not None:
-        objectselection = load_objectselection(args.objectselection)
-        print('Found following extra object selection to apply:')
-        print(objectselection[0])
-        print('(to the following branches):')
-        print(objectselection[1])
+        objectselection = []
+        for f in args.objectselection:
+            this_objectselection = load_objectselection(f)
+            objectselection.append(this_objectselection)
+            print('Found following extra object selection to apply:')
+            print(this_objectselection[0])
+            print('(to the following branches):')
+            print(this_objectselection[1])
 
     # read extra selection to apply
     event_selection_name = None
@@ -819,7 +830,8 @@ if __name__=='__main__':
                 branches_to_read += get_variable_names(selection_string)
     # add selection
     if objectselection is not None:
-        branches_to_read += get_variable_names(objectselection[0])
+        for this_objectselection in objectselection:
+            branches_to_read += get_variable_names(this_objectselection[0])
     if eventselection is not None:
         branches_to_read += get_variable_names(eventselection)
     # add variables to plot
