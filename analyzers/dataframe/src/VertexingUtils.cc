@@ -554,8 +554,8 @@ double get_PV2V0angle(FCCAnalysesVertex V0, FCCAnalysesVertex PV) {
   for (TVector3 p_tr : p_tracks)
     p_sum += p_tr;
 
-  edm4hep::Vector3f r_V0 = V0.vertex.position; // in mm
-  edm4hep::Vector3f r_PV = PV.vertex.position; // in mm
+  edm4hep::Vector3f r_V0 = V0.vertex.position;
+  edm4hep::Vector3f r_PV = PV.vertex.position;
 
   TVector3 r_V0_PV(r_V0[0] - r_PV[0], r_V0[1] - r_PV[1], r_V0[2] - r_PV[2]);
 

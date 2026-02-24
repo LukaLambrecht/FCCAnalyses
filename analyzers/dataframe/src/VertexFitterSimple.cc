@@ -243,18 +243,54 @@ VertexFitter_Tk(int Primary, ROOT::VecOps::RVec<edm4hep::TrackState> tracks,
     covMatrix[5] = covX(2, 2);
     result.covMatrix = covMatrix;
 
-    VertexMore theVertexMore(&theVertexFit, Units_mm);
+    // get more information from the vertex fit
+    // note: up until this point, units didn't matter much as long as they are internally consistent;
+    //       but the code below assumes mm, and this is important for correct momentum propagation.
+    //       need to get the fit with correct units, but I don't want to break the code above,
+    //       so best solution seems to re-do the vertex fit with modified input parameters (although this is slow)...
+    TVectorD **trkPar_2 = new TVectorD *[Ntr];
+    TMatrixDSym **trkCov_2 = new TMatrixDSym *[Ntr];
+    bool Units_mm = true;
     for (Int_t i = 0; i < Ntr; i++) {
-        TVectorD updated_par = theVertexFit.GetNewPar(i);
+        edm4hep::TrackState t = tracks[i];
+        TVectorD par = VertexingUtils::get_trackParam(t, Units_mm);
+        // modify units
+        par[0] *= 10; // d0 in cm instead of mm
+        par[2] /= 10; // omega in 1/cm instead of 1/mm
+        par[3] *= 10; // z0 in cm instead of mm
+        // extra: the VertexMore class seems to have a magnetic field of 2T hard-coded, so modify omega accordingly...
+        par[2] *= (2/1.5);
+        trkPar_2[i] = new TVectorD(par);
+        TMatrixDSym Cov = VertexingUtils::get_trackCov(t, Units_mm);
+        trkCov_2[i] = new TMatrixDSym(Cov);
+    }
+    // note: no beamspot constraints yet as this part is typically only used for secondary vertices
+    VertexingUtils::FCCAnalysesVertex TheVertex_2;
+    VertexFit theVertexFit_2(Ntr, trkPar_2, trkCov_2);
+    TVectorD x_2 = theVertexFit_2.GetVtx();
+    // make extra info
+    VertexMore theVertexMore(&theVertexFit_2, Units_mm);
+
+    // copy properties
+    for (Int_t i = 0; i < Ntr; i++) {
+        TVectorD updated_par = theVertexFit.GetNewPar(i); // use the old fit (in original units)
         TVectorD updated_par_edm4hep = VertexingUtils::Delphes2Edm4hep_TrackParam(updated_par, Units_mm);
         updated_track_parameters.push_back(updated_par_edm4hep);
-        TVector3 ptrack_at_vertex = theVertexMore.GetMomentum(i);
+        TVector3 ptrack_at_vertex = theVertexMore.GetMomentum(i); // use the new fit (in correct units)
         updated_track_momentum_at_vertex.push_back(ptrack_at_vertex);
     }
   
     TheVertex.updated_track_parameters = updated_track_parameters;
     TheVertex.updated_track_momentum_at_vertex = updated_track_momentum_at_vertex;
     TheVertex.final_track_phases = final_track_phases;
+
+    // memory cleanup
+    for (Int_t i = 0; i < Ntr; i++) {
+        delete trkPar_2[i];
+        delete trkCov_2[i];
+    }
+    delete[] trkPar_2;
+    delete[] trkCov_2;
   } // end case of full fit
 
 #if EDM4HEP_BUILD_VERSION <= EDM4HEP_VERSION(0, 10, 5)

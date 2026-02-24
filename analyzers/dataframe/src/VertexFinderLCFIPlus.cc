@@ -494,7 +494,7 @@ ROOT::VecOps::RVec<bool> isV0(
       // - opposite charge
       if(t_pair[0].omega * t_pair[1].omega > 0) continue;
       // - more or less same direction
-      if( p_i.DeltaR(p_j) > 0.4 ) continue;
+      //if( p_i.DeltaR(p_j) > 0.4 ) continue;
 
       // fit common vertex
       double chi2max = 10.;
@@ -581,7 +581,7 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
       // - opposite charge
       if(tr_pair[0].omega * tr_pair[1].omega > 0) continue;
       // - more or less same direction
-      if( p_i.DeltaR(p_j) > 0.4 ) continue;
+      //if( p_i.DeltaR(p_j) > 0.4 ) continue;
 
       // try to make a V0 candidate
       ROOT::VecOps::RVec<double> V0_cand = get_V0candidate(V0_vtx, tr_pair, PV, true, chi2_cut);
@@ -834,11 +834,11 @@ ROOT::VecOps::RVec<double> get_V0candidate(VertexingUtils::FCCAnalysesVertex &V0
   edm4hep::Vector3f r_PV = PV.vertex.position; // in mm
   
   // fit a common vertex (fast method) and do basic checks
-  if( chi2 ){
+  /*if( chi2 ){
     V0_vtx = VertexFitterSimple::VertexFitter_Tk(2, tr_pair, false, 0, 0, 0, 0, 0, 0, true);
     double chi2 = V0_vtx.vertex.chi2; // normalised but ndof = 1
     if(chi2 >= chi2_cut) return result;
-  }
+  }*/
 
   // fit a common vertex (full method)
   V0_vtx = VertexFitterSimple::VertexFitter_Tk(2, tr_pair);
@@ -856,9 +856,9 @@ ROOT::VecOps::RVec<double> get_V0candidate(VertexingUtils::FCCAnalysesVertex &V0
   result[3] = VertexingUtils::get_invM_pairs(V0_vtx, m_e, m_e);
 
   // V0 candidate distance from PV
-  edm4hep::Vector3f r_V0 = V0_vtx.vertex.position; // in mm
+  edm4hep::Vector3f r_V0 = V0_vtx.vertex.position;
   TVector3 r_V0_PV(r_V0[0] - r_PV[0], r_V0[1] - r_PV[1], r_V0[2] - r_PV[2]);
-  result[4] = r_V0_PV.Mag(); // in mm
+  result[4] = r_V0_PV.Mag();
 
   // angle b/n V0 candidate momentum & PV-V0 displacement vector
   result[5] = VertexingUtils::get_PV2V0angle(V0_vtx, PV);
@@ -882,14 +882,14 @@ ROOT::VecOps::RVec<double> constraints_Ks(bool tight) {
   if(tight) {
     result[0] = 0.493;
     result[1] = 0.503;
-    result[2] = 0.05; // originally 0.5 [mm]
+    result[2] = 0.1; // originally 0.5 [mm]
     result[3] = 0.999;
   }
 
   else {
-    result[0] = 0.488;
-    result[1] = 0.508;
-    result[2] = 0.03; // originally 0.3 [mm]
+    result[0] = 0.478; // originally 0.488;
+    result[1] = 0.518; // originally 0.508;
+    result[2] = 0.1; // originally 0.3 [mm]
     result[3] = 0.999;
   }
   
