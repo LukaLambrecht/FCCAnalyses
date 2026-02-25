@@ -116,6 +116,10 @@ int main(int argc, char* argv[]) {
   // V0 candidates properties
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_pdgId = 0;
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_mass = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_dxy = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_dxyz = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_chi2 = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_chi2Normalized = 0;
  
   // jet constituent properties
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_e = 0;
@@ -273,6 +277,11 @@ int main(int argc, char* argv[]) {
   // V0 candidates properties
   ev->SetBranchAddress("V0Candidates_pdgId", &V0Candidates_pdgId);
   ev->SetBranchAddress("V0Candidates_mass", &V0Candidates_mass);
+  ev->SetBranchAddress("V0Candidates_dxy", &V0Candidates_dxy);
+  ev->SetBranchAddress("V0Candidates_dxyz", &V0Candidates_dxyz);
+  ev->SetBranchAddress("V0Candidates_chi2", &V0Candidates_chi2);
+  ev->SetBranchAddress("V0Candidates_chi2Normalized", &V0Candidates_chi2Normalized);
+
 
   // jet constituent properties
   ev->SetBranchAddress("JetsConstituents_e", &JetsConstituents_e);
@@ -444,6 +453,10 @@ int main(int argc, char* argv[]) {
   // V0 candidate variables
   float v0cand_pdgId[1000] = {0.};
   float v0cand_mass[1000] = {0.};
+  float v0cand_dxy[1000] = {0.};
+  float v0cand_dxyz[1000] = {0.};
+  float v0cand_chi2[1000] = {0.};
+  float v0cand_chi2Normalized[1000] = {0.};
 
   // jet constituent variables
   float pfcand_e[1000] = {0.};
@@ -623,6 +636,10 @@ int main(int argc, char* argv[]) {
   // V0 candidate variables
   ntuple->Branch("v0cand_pdgId", v0cand_pdgId, "v0cand_pdgId[recojet_nv0candidates]/F");
   ntuple->Branch("v0cand_mass", v0cand_mass, "v0cand_mass[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_dxy", v0cand_dxy, "v0cand_dxy[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_dxyz", v0cand_dxyz, "v0cand_dxyz[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_chi2", v0cand_chi2, "v0cand_chi2[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_chi2Normalized", v0cand_chi2Normalized, "v0cand_chi2Normalized[recojet_nv0candidates]/F");
 
   // jet constituent variables
   ntuple->Branch("pfcand_e", pfcand_e, "pfcand_e[nconst]/F");
@@ -840,6 +857,10 @@ int main(int argc, char* argv[]) {
       for(int k=0; k < recojet_nv0candidates; k++){
           v0cand_pdgId[k] = (V0Candidates_pdgId->at(j))[k];
           v0cand_mass[k] = (V0Candidates_mass->at(j))[k];
+          v0cand_dxy[k] = (V0Candidates_dxy->at(j))[k];
+          v0cand_dxyz[k] = (V0Candidates_dxyz->at(j))[k];
+          v0cand_chi2[k] = (V0Candidates_chi2->at(j))[k];
+          v0cand_chi2Normalized[k] = (V0Candidates_chi2Normalized->at(j))[k];
       }
       
       // loop over constituents

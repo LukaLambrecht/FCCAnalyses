@@ -903,14 +903,14 @@ ROOT::VecOps::RVec<double> constraints_Lambda0(bool tight) {
   if(tight) {
     result[0] = 1.111;
     result[1] = 1.121;
-    result[2] = 0.05; // originally 0.5 [mm]
+    result[2] = 0.1; // originally 0.5 [mm]
     result[3] = 0.99995;
   }
 
   else {
     result[0] = 1.106;
     result[1] = 1.126;
-    result[2] = 0.03; // originally 0.3 [mm]
+    result[2] = 0.1; // originally 0.3 [mm]
     result[3] = 0.999;
   }
 

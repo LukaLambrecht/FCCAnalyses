@@ -549,6 +549,10 @@ class RDFanalysis():
             # calculate properties of V0 candidates to store
             .Define("V0Candidates_pdgId", "SecondaryVertexTools::distributeOverJets(EventV0s.pdgAbs, v0_jet_ids)")
             .Define("V0Candidates_mass", "SecondaryVertexTools::distributeOverJets(EventV0s.invM, v0_jet_ids)")
+            .Define("V0Candidates_dxy", "SecondaryVertexTools::distributeOverJets(SecondaryVertexTools::get_dxy(EventV0s, PrimaryVertexObject), v0_jet_ids)")
+            .Define("V0Candidates_dxyz", "SecondaryVertexTools::distributeOverJets(SecondaryVertexTools::get_dxyz(EventV0s, PrimaryVertexObject), v0_jet_ids)")
+            .Define("V0Candidates_chi2", "SecondaryVertexTools::distributeOverJets(SecondaryVertexTools::get_chi2(EventV0s), v0_jet_ids)")
+            .Define("V0Candidates_chi2Normalized", "SecondaryVertexTools::distributeOverJets(SecondaryVertexTools::get_chi2Normalized(EventV0s), v0_jet_ids)")
 
             # store counters
             .Define("Event_nV0Candidates", "EventV0s.vtx.size()")
@@ -906,7 +910,11 @@ class RDFanalysis():
             'Jets_nKsCandidates',
             'Jets_nLambdaCandidates',
             'V0Candidates_pdgId',
-            'V0Candidates_mass'
+            'V0Candidates_mass',
+            'V0Candidates_dxy',
+            'V0Candidates_dxyz',
+            'V0Candidates_chi2',
+            'V0Candidates_chi2Normalized',
           ]
 
         # jet-constituent-level variables
