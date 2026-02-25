@@ -67,8 +67,12 @@ if __name__=='__main__':
       #'sv_cosPointing',
       #'sv_correctedMass',
 
-      #'v0cand_pdgId',
-      #'v0cand_mass',
+      'v0cand_pdgId',
+      'v0cand_mass',
+      'v0cand_dxy',
+      'v0cand_dxyz',
+      'v0cand_chi2',
+      'v0cand_chi2Normalized',
 
       'pfcand_pt',
       #'pfcand_e',
@@ -98,12 +102,12 @@ if __name__=='__main__':
       #'pfcand_dxydxy',
       #'pfcand_dzdz',
 
-      'pfcand_dEdx_pads_type',
-      'pfcand_dEdx_pads_value',
-      'pfcand_dEdx_pads_error',
-      'pfcand_dEdx_wires_type',
-      'pfcand_dEdx_wires_value',
-      'pfcand_dEdx_wires_error',      
+      #'pfcand_dEdx_pads_type',
+      #'pfcand_dEdx_pads_value',
+      #'pfcand_dEdx_pads_error',
+      #'pfcand_dEdx_wires_type',
+      #'pfcand_dEdx_wires_value',
+      #'pfcand_dEdx_wires_error',      
     ]
 
     # make output dir if needed
@@ -198,10 +202,11 @@ if __name__=='__main__':
             data[category] = this_data[mask]
 
         # special case: ignore failed measurements for dEdx
-        for category in categories.keys():
-            this_data = data[category]
-            mask = (this_data > 0.1).astype(bool)
-            data[category] = this_data[mask]
+        if variable == 'pfcand_dEdx_wires_value' or variable == 'pfcand_dEdx_pads_value':
+            for category in categories.keys():
+                this_data = data[category]
+                mask = (this_data > 0.1).astype(bool)
+                data[category] = this_data[mask]
 
         # group categories in single array
         data_array = np.concatenate(list(data.values()))
@@ -233,7 +238,8 @@ if __name__=='__main__':
             minv = -maxv
         if is_integer:
             maxv = max(maxv, 5)
-            minv = int(minv) - 0.5
+            #minv = int(minv) - 0.5
+            minv = -0.5
             maxv = int(maxv) + 0.5
         # special cases (hard-coded)
         if variable == 'sv_chi2Normalized': (minv, maxv) = (-2, 25)
