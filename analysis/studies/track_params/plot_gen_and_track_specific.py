@@ -18,14 +18,14 @@ if __name__=='__main__':
     # settings
     inputfile = sys.argv[1]
     eventidx = int(sys.argv[2])
-    sposrange = 5
+    sposrange = 50
     snegrange = 0
     xlim = None
     ylim = None
     zlim = None
-    xlim = (-3, 3)
-    ylim = (-3, 3)
-    zlim = (-3, 3)
+    xlim = (-30, 30)
+    ylim = (-30, 30)
+    zlim = (-30, 30)
 
     # set branches to read
     branches_to_read = [

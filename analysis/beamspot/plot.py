@@ -5,6 +5,10 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
+# global pyplot settings
+plt.rc("text", usetex=True)
+plt.rc("font", family="serif")
+
 
 if __name__=='__main__':
 
@@ -51,7 +55,7 @@ if __name__=='__main__':
         ax2.fill_between(xax, stds, color=color, alpha=0.3)
 
         # plot aesthetics
-        varlabel = f'Primary vertex {coord}-coordinate'
+        varlabel = f'Beamspot {coord}-coordinate'
         ax1.set_xticklabels([])
         ax1.set_xticks([])
         text = ax1.text(0.98, 0.95, varlabel + ' fitted center + width', ha='right', va='top',
@@ -76,6 +80,7 @@ if __name__=='__main__':
     outputfile = os.path.join(args.outputdir, f'summary_beamspotfit.png')
     if args.sim: outputfile = outputfile.replace('.png', '_sim.png')
     fig.savefig(outputfile)
+    fig.savefig(outputfile.replace('.png', '.pdf'))
 
     # make another summary figure
     fig, axs = plt.subplots(nrows=6, figsize=(12,12))
@@ -86,7 +91,6 @@ if __name__=='__main__':
         means = np.array([data[run]['fits'][varname][0] for run in data.keys()])
         uncs = np.array([data[run]['fits'][varname][2] for run in data.keys()])
         xax = np.arange(len(means))
-
         coord = varname.split('_')[-1]
         color = colors.get(coord, 'blue')
 
@@ -101,7 +105,7 @@ if __name__=='__main__':
         ax2.fill_between(xax, uncs, color=color, alpha=0.3)
 
         # plot aesthetics
-        varlabel = 'Primary vertex ' + r'$\bf{' + coord + '}$' + '-coordinate'
+        varlabel = 'Beamspot ' + r'$\bf{' + coord + '}$' + '-coordinate'
         ax1.set_xticklabels([])
         ax1.set_xticks([])
         text = ax1.text(0.98, 0.95, varlabel + ' fitted center',
@@ -109,6 +113,7 @@ if __name__=='__main__':
         text.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
         ax1.set_ylabel(f'{coord} [cm]', fontsize=15)
         ax1.tick_params(labelsize=15)
+        
         ax2.set_xticklabels([])
         ax2.set_xticks([])
         text = ax2.text(0.98, 0.95, varlabel + ' uncertainty on fitted center',
@@ -116,6 +121,8 @@ if __name__=='__main__':
         text.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
         ax2.grid(axis='y', which='both', linestyle='dashed', color='grey')
         ax2.set_ylim((0, ax2.get_ylim()[1]*1.2))
+        if coord=='x' or coord=='y': ax2.set_ylim((0, 0.002))
+        elif coord=='z': ax2.set_ylim((0, 0.15))
         ax2.set_ylabel(f'{coord}-uncertainty [cm]', fontsize=15)
         ax2.tick_params(labelsize=15)
 
@@ -128,3 +135,4 @@ if __name__=='__main__':
     outputfile = os.path.join(args.outputdir, f'summary_beamspotcenter.png')
     if args.sim: outputfile = outputfile.replace('.png', '_sim.png')
     fig.savefig(outputfile)
+    fig.savefig(outputfile.replace('.png', '.pdf'))

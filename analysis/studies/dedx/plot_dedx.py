@@ -21,6 +21,11 @@ if __name__=='__main__':
     treename = 'events'
     outputdir = 'output_plots'
     isdata = ('output_data' in inputfiles[0]) # to make more robust
+    doscatter = False
+    pbins = [0, 0.5, 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30]
+    #pbins = []
+    #categories_to_plot = ['kaon', 'pion', 'electron', 'muon', 'proton']
+    categories_to_plot = ['kaon', 'pion']
 
     variables = [
       'JetsConstituents_pt',
@@ -68,6 +73,7 @@ if __name__=='__main__':
         'muon': np.abs(events['JetsConstituents_pdgId'])==13,
         'electron': np.abs(events['JetsConstituents_pdgId'])==11
     }
+    categories = {key: val for key, val in categories.items() if key in categories_to_plot}
     if isdata:
         categories = {
             'data': np.ones(len(events)).astype(bool)
@@ -153,73 +159,73 @@ if __name__=='__main__':
         print(f'  -> total: {sum([len(v[0]) for v in category_data.values()])}')
 
         # make figure
-        fig, ax = plt.subplots()
-        for category_label, data in category_data.items():
-            ax.scatter(data[0], data[1], s=1, c=colordict[category_label], label=labeldict[category_label], alpha=0.1)
+        if doscatter:
+            fig, ax = plt.subplots()
+            for category_label, data in category_data.items():
+                ax.scatter(data[0], data[1], s=1, c=colordict[category_label], label=labeldict[category_label], alpha=0.1)
 
-        # optional: add parametrizations
-        paxis = np.logspace(-1, 2, num=100)
-        if isdata:
-            for category_label in labeldict.keys():
-                if category_label=='data': continue
-                y = get_parametrized_curve(paxis, species=category_label, subsystem=system)
-                #color = colordict[category_label]
-                color = 'black'
-                ax.plot(paxis, y, color=color)
-        else:
-            for category_label in category_data.keys():
-                y = get_parametrized_curve(paxis, species=category_label, subsystem=system)
-                #color = colordict[category_label]
-                color = 'black'
-                ax.plot(paxis, y, color=color)
-
-        # plot aesthetics
-        ax.set_ylabel('dE/dx (normalized to MIPs)', fontsize=17)
-        ax.set_xlabel('Particle momentum [Gev]', fontsize=17)
-        ax.grid(which='both', axis='both')
-        leg = ax.legend(fontsize=17, loc='upper right')
-        for lh in leg.legend_handles:
-            lh.set_alpha(1)
-            lh.set_sizes([25])
-        ax.set_xscale('log')
-        ax.set_ylim((0, 5))
-        ax.set_xlim((0.3, 60))
-        ax.tick_params(labelsize=17)
-
-        docms = True
-        if docms:
-            cmstext = r'$\bf{ALEPH}$'
-            extracmstext = 'Archived Sim.'
-            if extracmstext is not None:
-                for part in extracmstext.split(' '): cmstext += r' $\it{' + f' {part}' + r'}$'
-            cmstext_in_box = False # maybe later add as argument
-            if cmstext_in_box:
-                ax.text(0.02, 0.98, cmstext,
-                    ha='left', va='top', fontsize=20, transform=ax.transAxes)
-                # modify the axis range to accommodate the CMS text
-                if logscale:
-                    yscale = ax.get_ylim()[1]/ax.get_ylim()[0]
-                    ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1]*yscale**(0.2))
-                else:
-                    yscale = ax.get_ylim()[1] - ax.get_ylim()[0]
-                    ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1] + yscale*0.2)
+            # optional: add parametrizations
+            paxis = np.logspace(-1, 2, num=100)
+            if isdata:
+                for category_label in labeldict.keys():
+                    if category_label=='data': continue
+                    y = get_parametrized_curve(paxis, species=category_label, subsystem=system)
+                    #color = colordict[category_label]
+                    color = 'grey'
+                    ax.plot(paxis, y, color=color, linestyle=':')
             else:
-                ax.text(0., 1., cmstext,
-                        ha='left', va='bottom', fontsize=20, transform=ax.transAxes)
+                for category_label in category_data.keys():
+                    y = get_parametrized_curve(paxis, species=category_label, subsystem=system)
+                    #color = colordict[category_label]
+                    color = 'black'
+                    ax.plot(paxis, y, color=color, linestyle='dashed')
 
-        # save figure
-        fig.tight_layout()
-        outputfile = os.path.join(outputdir, f'dedx_{system}_scatter.png')
-        fig.savefig(outputfile)
+            # plot aesthetics
+            ax.set_ylabel('dE/dx (normalized to MIPs)', fontsize=17)
+            ax.set_xlabel('Particle momentum [Gev]', fontsize=17)
+            ax.grid(which='both', axis='both')
+            leg = ax.legend(fontsize=17, loc='upper right')
+            for lh in leg.legend_handles:
+                lh.set_alpha(1)
+                lh.set_sizes([25])
+            ax.set_xscale('log')
+            ax.set_ylim((0, 5))
+            ax.set_xlim((0.3, 60))
+            ax.tick_params(labelsize=17)
+
+            docms = True
+            if docms:
+                cmstext = r'$\bf{ALEPH}$'
+                extracmstext = 'Archived Sim.'
+                if extracmstext is not None:
+                    for part in extracmstext.split(' '): cmstext += r' $\it{' + f' {part}' + r'}$'
+                cmstext_in_box = False # maybe later add as argument
+                if cmstext_in_box:
+                    ax.text(0.02, 0.98, cmstext,
+                        ha='left', va='top', fontsize=20, transform=ax.transAxes)
+                    # modify the axis range to accommodate the CMS text
+                    if logscale:
+                        yscale = ax.get_ylim()[1]/ax.get_ylim()[0]
+                        ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1]*yscale**(0.2))
+                    else:
+                        yscale = ax.get_ylim()[1] - ax.get_ylim()[0]
+                        ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1] + yscale*0.2)
+                else:
+                    ax.text(0., 1., cmstext,
+                            ha='left', va='bottom', fontsize=20, transform=ax.transAxes)
+
+            # save figure
+            fig.tight_layout()
+            outputfile = os.path.join(outputdir, f'dedx_{system}_scatter.png')
+            fig.savefig(outputfile)
 
         # make 1D histograms in slices of momentum
-        pbins = [0, 0.5, 1, 1.5, 2, 3, 4, 5, 10, 20, 30]
         for pidx in range(len(pbins)-1):
             plow = pbins[pidx]
             phigh = pbins[pidx+1]
 
             # set binning
-            vbins = np.linspace(0.5, 2.5, num=51)
+            vbins = np.linspace(0.5, 2, num=51)
             if plow == 0: vbins = np.linspace(0.5, 10, num=51)
             if plow == 0.5: vbins = np.linspace(0.5, 3, num=51)
 
@@ -252,6 +258,27 @@ if __name__=='__main__':
             ax.tick_params(labelsize=17)
             ymin, ymax = ax.get_ylim()
             ax.set_ylim((ymin, ymax*1.3))
+
+            docms = True
+            if docms:
+                cmstext = r'$\bf{ALEPH}$'
+                extracmstext = 'Archived Sim.'
+                if extracmstext is not None:
+                    for part in extracmstext.split(' '): cmstext += r' $\it{' + f' {part}' + r'}$'
+                cmstext_in_box = False # maybe later add as argument
+                if cmstext_in_box:
+                    ax.text(0.02, 0.98, cmstext,
+                        ha='left', va='top', fontsize=20, transform=ax.transAxes)
+                    # modify the axis range to accommodate the CMS text
+                    if logscale:
+                        yscale = ax.get_ylim()[1]/ax.get_ylim()[0]
+                        ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1]*yscale**(0.2))
+                    else:
+                        yscale = ax.get_ylim()[1] - ax.get_ylim()[0]
+                        ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1] + yscale*0.2)
+                else:
+                    ax.text(0., 1., cmstext,
+                            ha='left', va='bottom', fontsize=20, transform=ax.transAxes)
 
             # save figure
             fig.tight_layout()
