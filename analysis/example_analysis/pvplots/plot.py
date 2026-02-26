@@ -49,7 +49,7 @@ def plot_hists(hists_combined, variables, outputdir,
         colordict['qqb'] = 'grey'
         colordict['light'] = 'grey'
         colordict['uudd'] = 'paleturquoise'
-        colordict['ss'] = 'lightskyblue'
+        colordict['ss'] = 'dodgerblue'
         colordict['cc'] = 'slateblue'
         colordict['bb'] = 'darkorchid'
 
@@ -103,6 +103,7 @@ def plot_hists(hists_combined, variables, outputdir,
             def gauss(x, a, mu, sigma):
                 return a * np.exp(-0.5*np.square((x-mu)/sigma))
             process_widths = {}
+            fitted_functions = {}
             for process_key, hist in hists_sim_nominal.items():
                 counts = hist[0]
                 a_init = np.amax(counts)
@@ -111,6 +112,7 @@ def plot_hists(hists_combined, variables, outputdir,
                 fitresult = curve_fit(gauss, bincenters, counts, p0=[a_init, mu_init, sigma_init])
                 a, mu, sigma = fitresult[0]
                 process_widths[process_key] = sigma
+                fitted_functions[process_key] = gauss(bincenters, a, mu, sigma)
 
             # concatenate all histograms in a single array (for later use)
             histarray = [h[0] for h in hists_sim_nominal.values()]
@@ -176,16 +178,22 @@ def plot_hists(hists_combined, variables, outputdir,
                     bins = variable.bins
                     binwidths = bins[1:] - bins[:-1]
                     unique_binwidths = list(set(binwidths))
+                    unique_binwidths = ([unique_binwidths[0]]
+                        + [el for el in unique_binwidths[1:] if abs(el-unique_binwidths[0])/unique_binwidths[0] > 1e-6])
                     if len(unique_binwidths)==1:
                         binwidth = unique_binwidths[0]
+                        # specific hack for this specific case
+                        binwidth = int(round(1e4*binwidth))
+                        variable.unit = r'$\mu m$'
+                        # continue generic approach
                         binwidthtxt = '{:.2f}'.format(binwidth)
                         if binwidth.is_integer(): binwidthtxt = str(int(binwidth))
                         yaxtitle += f' / {binwidthtxt} {variable.unit}'
                     else: yaxtitle += ' / Bin'
                 else: yaxtitle += ' / Bin'
+            if normalize: yaxtitle += ' (normalized)'
 
             # do plotting
-            if normalize: yaxtitle += ' (normalized)'
             fig, axs = plot(bkg=hists_sim_nominal,
                        data=data,
                        systematics=systematics,
@@ -203,6 +211,13 @@ def plot_hists(hists_combined, variables, outputdir,
                        dolegend=False,
                        ratios=ratios,
                        ratio_yaxtitles=ratio_yaxtitles)
+
+            # optional for checking: add fitted function
+            for process_key, fitted_function in fitted_functions.items():
+                if normalize:
+                    integral = np.sum(np.multiply(fitted_function, binwidths))
+                    fitted_function /= integral
+                axs[0].plot(bincenters, fitted_function, color='red', linestyle=':')
 
             # some more plot aesthetics
             axs[0].set_ylim((0, axs[0].get_ylim()[1]*1.4))
@@ -228,6 +243,7 @@ def plot_hists(hists_combined, variables, outputdir,
             figname = os.path.join(outputdir, figname)
             if not os.path.exists(outputdir): os.makedirs(outputdir)
             fig.savefig(figname)
+            fig.savefig(figname.replace('.png', '.pdf'))
             plt.close(fig)
             print(f'Figure saved to {figname}.')
             del axs
@@ -253,6 +269,13 @@ def plot_hists(hists_combined, variables, outputdir,
                        dolegend=False,
                        ratios=ratios,
                        ratio_yaxtitles=ratio_yaxtitles)
+
+                # optional for checking: add fitted function
+                for process_key, fitted_function in fitted_functions.items():
+                    if normalize:
+                        integral = np.sum(np.multiply(fitted_function, binwidths))
+                        fitted_function /= integral
+                    axs[0].plot(bincenters, fitted_function, color='red', linestyle=':')
 
                 # some more plot aesthetics
                 if np.any(histarray > 0):
@@ -280,6 +303,7 @@ def plot_hists(hists_combined, variables, outputdir,
                 figname = region_name + '_' + variable.name + '_log.png'
                 figname = os.path.join(outputdir, figname)
                 fig.savefig(figname)
+                fig.savefig(figname.replace('.png', '.pdf'))
                 plt.close(fig)
                 print(f'Figure saved to {figname}.')
                 del axs
@@ -479,6 +503,7 @@ if __name__=='__main__':
 
     # plot aesthetics settings
     extracmstext = 'Archived Data'
+    if args.data is None: extracmstext = 'Archived Sim.'
     lumiheaderparts = []
     if args.year is not None:
         lumiheaderparts.append(args.year)

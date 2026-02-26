@@ -79,5 +79,14 @@
   "xlow": -0.5,
   "xhigh": 3.5,
   "nbins": 4
+},
+{
+  "name": "jet_nsv",
+  "variable": "Jets_nSV",
+  "axtitle": "Number of secondary vertices per jet",
+  "unit": "",
+  "xlow": -0.5,
+  "xhigh": 5.5,
+  "nbins": 6
 }
 ]

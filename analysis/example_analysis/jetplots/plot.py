@@ -275,7 +275,7 @@ if __name__=='__main__':
     colordict['q'] = 'grey'
     colordict['light'] = 'grey'
     colordict['ud'] = 'paleturquoise'
-    colordict['s'] = 'lightskyblue'
+    colordict['s'] = 'dodgerblue'
     colordict['c'] = 'slateblue'
     colordict['b'] = 'darkorchid'
 
@@ -308,6 +308,7 @@ if __name__=='__main__':
 
     # plot aesthetics settings
     extracmstext = 'Archived Data'
+    if args.data is None: extracmstext = 'Archived Sim.'
     lumiheaderparts = []
     if args.year is not None:
         lumiheaderparts.append(args.year)
@@ -389,6 +390,21 @@ if __name__=='__main__':
             yaxtitle = 'Jets'
             if variable.variable.startswith('pfcand_'): yaxtitle = 'Jet contituents'
             if variable.variable.startswith('sv_'): yaxtitle = 'Secondary vertices'
+            include_binwidth = True # maybe later add as argument
+            if include_binwidth:
+                if variable.unit is not None and len(variable.unit)>0:
+                    bins = variable.bins
+                    binwidths = bins[1:] - bins[:-1]
+                    unique_binwidths = list(set(binwidths))
+                    unique_binwidths = ([unique_binwidths[0]]
+                        + [el for el in unique_binwidths[1:] if abs(el-unique_binwidths[0])/unique_binwidths[0] > 1e-6])
+                    if len(unique_binwidths)==1:
+                        binwidth = unique_binwidths[0]
+                        binwidthtxt = '{:.2f}'.format(binwidth)
+                        if binwidth.is_integer(): binwidthtxt = str(int(binwidth))
+                        yaxtitle += f' / {binwidthtxt} {variable.unit}'
+                    else: yaxtitle += ' / Bin'
+                else: yaxtitle += ' / Bin'
             if normalize: yaxtitle += ' (normalized)'
 
             # do plotting
@@ -432,6 +448,7 @@ if __name__=='__main__':
             figname = region_name + '_' + variable.name + '.png'
             figname = os.path.join(args.outputdir, figname)
             fig.savefig(figname)
+            fig.savefig(figname.replace('.png', '.pdf'))
             plt.close(fig)
             print(f'Figure saved to {figname}.')
             del axs
@@ -461,7 +478,10 @@ if __name__=='__main__':
                 if np.any(histarray > 0):
                     if not normalize: ymin = np.min(histarray[np.nonzero(histarray)])
                     else: ymin = axs[0].get_ylim()[0]
-                    axs[0].set_ylim((ymin, axs[0].get_ylim()[1]**1.2))
+                    ymax = axs[0].get_ylim()[1]
+                    new_ymax = ymax**1.2
+                    if ymax < 1: new_ymax = ymax**(1/1.2)
+                    axs[0].set_ylim((ymin, new_ymax))
                 axs[0].legend(loc='upper right', fontsize=17, ncols=1)
                 if len(regions.keys())>1:
                     axs[0].text(0.05, 0.9, region_name, ha='left', va='top', fontsize=15,
@@ -483,6 +503,7 @@ if __name__=='__main__':
                 figname = region_name + '_' + variable.name + '_log.png'
                 figname = os.path.join(args.outputdir, figname)
                 fig.savefig(figname)
+                fig.savefig(figname.replace('.png', '.pdf'))
                 plt.close(fig)
                 print(f'Figure saved to {figname}.')
                 del axs

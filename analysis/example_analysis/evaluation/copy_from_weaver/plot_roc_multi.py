@@ -103,12 +103,9 @@ def plot_scores_multi(events,
         plt.close()
 
 
-def plot_roc_multi(events,
+def make_roc_curves(events,
             signal_categories,
-            background_categories,
-            outputdir = None,
-            doRb = False,
-            doAFB = False):
+            background_categories):
 
     # check arguments
     all_categories = {**signal_categories, **background_categories}
@@ -126,35 +123,10 @@ def plot_roc_multi(events,
             mask = events[branch].astype(bool)
         masks[category_name] = mask
 
-    # make output directory
-    if outputdir is not None:
-        if not os.path.exists(outputdir): os.makedirs(outputdir)
-
-    # initialize figure
-    fig, ax = plt.subplots()
-
-    # initialize colors (automatic)
-    nlines = int(len(all_categories)*(len(all_categories)-1)/2)
-    cmap = plt.get_cmap('cool', nlines)
-    cidx = 0
-
-    # initialize colors (ad hoc, hard-coded)
-    cmap = {}
-    cmap[('b', 'c')] = 'darkorchid'
-    cmap[('b', 'uds')] = 'crimson'
-    cmap[('b', 'udsc')] = 'mediumvioletred'
-    cmap[('c', 'uds')] = 'dodgerblue'
-    #cmap[('s', 'udcb')] = 
-    #cmap[('s', 'ud')] = 
-
-    # initialize a table
-    table = {}
-    table['sig_effs'] = [0.2, 0.4, 0.6, 0.8]
-
     # loop over pairs of categories
-    #for signal_category_name, signal_category_settings in signal_categories.items():
-    #    for background_category_name, background_category_settings in background_categories.items():
     # update: loop over all pairs, not just signal vs background
+    roc_curves = {}
+    aucs = {}
     for sidx, (signal_category_name, signal_category_settings) in enumerate(all_categories.items()):
         for bidx, (background_category_name, background_category_settings) in enumerate(all_categories.items()):
                 if bidx <= sidx: continue
@@ -173,7 +145,7 @@ def plot_roc_multi(events,
                 scores_bkg = scores[masks[background_category_name]]
                 weights_sig = np.ones(len(scores_sig))
                 weights_bkg = np.ones(len(scores_bkg))
-                
+
                 # safety for no passing events
                 if len(scores_sig)==0 or len(scores_bkg)==0:
                     continue
@@ -200,6 +172,64 @@ def plot_roc_multi(events,
                 efficiency_sig /= np.sum(weights_sig)
                 efficiency_bkg /= np.sum(weights_bkg)
 
+                # add to dict
+                key = (signal_category_name, background_category_name)
+                val = (efficiency_sig, efficiency_bkg)
+                roc_curves[key] = val
+                aucs[key] = auc
+
+    return (roc_curves, aucs)
+
+    
+def plot_roc_multi(events,
+            signal_categories,
+            background_categories,
+            outputdir = None,
+            doRb = False,
+            doAFB = False):
+
+    # check arguments
+    all_categories = {**signal_categories, **background_categories}
+
+    # make output directory
+    if outputdir is not None:
+        if not os.path.exists(outputdir): os.makedirs(outputdir)
+
+    # initialize figure
+    fig, ax = plt.subplots()
+
+    # initialize colors (automatic)
+    nlines = int(len(all_categories)*(len(all_categories)-1)/2)
+    cmap = plt.get_cmap('cool', nlines)
+    cidx = 0
+
+    # initialize colors (ad hoc, hard-coded)
+    cmap = {}
+    cmap[('b', 'c')] = 'darkorchid'
+    cmap[('b', 'uds')] = 'crimson'
+    cmap[('b', 'udsc')] = 'mediumvioletred'
+    cmap[('c', 'uds')] = 'dodgerblue'
+    #cmap[('s', 'udcb')] = 
+    cmap[('s', 'ud')] = 'forestgreen'
+
+    # initialize a table
+    table = {}
+    table['sig_effs'] = [0.2, 0.4, 0.6, 0.8]
+
+    # make roc curves
+    roc_curves, aucs = make_roc_curves(events, signal_categories, background_categories)
+
+    # loop over pairs of categories
+    # update: loop over all pairs, not just signal vs background
+    for sidx, (signal_category_name, signal_category_settings) in enumerate(all_categories.items()):
+        for bidx, (background_category_name, background_category_settings) in enumerate(all_categories.items()):
+                if bidx <= sidx: continue
+               
+                # get roc curve 
+                key = (signal_category_name, background_category_name)
+                efficiency_sig, efficiency_bkg = roc_curves[key]
+                auc = aucs[key]
+                
                 # make a plot of the ROC curve
                 label = signal_category_settings['label'] + ' vs. '
                 label += background_category_settings['label']
@@ -223,8 +253,9 @@ def plot_roc_multi(events,
     # ad-hoc addition (maybe clean up later):
     # add Rb reference
     if doRb:
-        ax.scatter(0.00216, 0.1957, s=40, color=cmap[('b', 'c')], edgecolor=None, label='$b$-jets vs. $c$-jets (ALEPH)')
-        ax.scatter(0.00043, 0.1957, s=40, color=cmap[('b', 'uds')], edgecolors=None, label='$b$-jets vs. $uds$-jets (ALEPH)')
+        ref = r'\textit{Phys. Lett. B} \textbf{401} (1997) 163-175'
+        ax.scatter(0.00216, 0.1957, s=40, color=cmap[('b', 'c')], edgecolor=None, label=f'$b$-jets vs. $c$-jets ({ref})')
+        ax.scatter(0.00043, 0.1957, s=40, color=cmap[('b', 'uds')], edgecolors=None, label=f'$b$-jets vs. $uds$-jets ({ref})')
 
     # ad-hoc addition (maybe clean up later):
     # add A_FB reference
@@ -234,13 +265,32 @@ def plot_roc_multi(events,
         df = pd.read_csv(filepath)
         sig_eff = df['sig_eff'].values[:-1]
         bkg_eff = df['bkg_eff'].values[:-1]
-        ax.plot(bkg_eff, sig_eff, color=cmap[('b', 'udsc')], linewidth=2, linestyle='dotted', label='$b$-jets vs. $udsc$-jets (ALEPH)')
-        print('AFB not yet implemented')
+        ref = r'\textit{Eur. Phys. J. C} \textbf{22} (2001) 201-215'
+        ax.plot(bkg_eff, sig_eff, color=cmap[('b', 'udsc')], linewidth=2, linestyle='dotted', label=f'$b$-jets vs. $udsc$-jets ({ref})')
 
     # add random guessing line
     dummy_efficiency = np.linspace(0, 1, num=101)
     ax.plot(dummy_efficiency, dummy_efficiency,
       color='darkblue', linewidth=3, linestyle='--', label='Random guessing')
+
+    # add aleph logo
+    docms = True
+    extracmstext = 'Archived Sim.'
+    if docms:
+        cmstext = r'$\bf{ALEPH}$'
+        if extracmstext is not None:
+            for part in extracmstext.split(' '): cmstext += r' $\it{' + f' {part}' + r'}$'
+        cmstext_in_box = True # maybe later add as argument
+        if cmstext_in_box:
+            text = ax.text(0.02, 0.98, cmstext,
+                    ha='left', va='top', fontsize=20, transform=ax.transAxes)
+            text.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
+            # modify the axis range to accommodate the CMS text
+            #yscale = ax.get_ylim()[1] - ax.get_ylim()[0]
+            #ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1] + yscale*0.2)
+        else:
+            ax.text(0., 1., cmstext,
+                    ha='left', va='bottom', fontsize=20, transform=ax.transAxes)
 
     # other plot settings
     ax.set_xlabel('Background pass-through', fontsize=22)
@@ -255,18 +305,18 @@ def plot_roc_multi(events,
         #w, h = fig.get_size_inches()
         #fig.set_size_inches(w*1.75, h, forward=True)
 
-    # save figure
-    #fig.tight_layout()
+    # save the figure
     figname = os.path.join(outputdir, 'roc.png')
     fig.savefig(figname, bbox_extra_artists=(leg,), bbox_inches='tight')
+    fig.savefig(figname.replace('.png', '.pdf'), bbox_extra_artists=(leg,), bbox_inches='tight')
     print(f'Saved figure {figname}.')
 
     # same with log scale on x-axis
     ax.set_xscale('log')
     ax.set_xlim((1e-5, 1))
-    #fig.tight_layout()
     figname = os.path.join(outputdir, 'roc_log.png')
     fig.savefig(figname, bbox_extra_artists=(leg,), bbox_inches='tight')
+    fig.savefig(figname.replace('.png', '.pdf'), bbox_extra_artists=(leg,), bbox_inches='tight')
     print(f'Saved figure {figname}.')
     plt.close()
 
