@@ -14,12 +14,14 @@ import tools.slurmtools as st
 if __name__=='__main__':
 
     # settings
-    modeltag = '20260221_withstrange_withdedx_noptype_part'
+    modeltag = '20260225_withstrange_withdedx_masked'
+    #modeltag = '20260225_withstrange_withdedx_masked_noneutralptype'
+    #modeltag = '20260225_withstrange_withdedx_masked_noptype'
+    #modeltag = '20260225_withstrange_withpid_kaonandpion'
     ntupletag = 'withdedx'
     model = os.path.abspath(f'models/output_{modeltag}/model.onnx')
     preprocess = model.replace('model.onnx', 'preprocess.json')
-    outputdir = f'output_scores_model_{modeltag}'
-    #outputdir = f'output_scores_model_20260205_withsvloose_for_withdmerge'
+    outputdir = f'/eos/user/l/llambrec/aleph-data/output_scores_model_{modeltag}'
     runmode = 'local'
     resubmit = True
     ntuplename = f'ntuples-{ntupletag}' if ntupletag is not None else 'ntuples'

@@ -6,17 +6,31 @@ import pickle
 import numpy as np
 
 
+def find_external_files(input_files, external_variable_dir, verbose=False):
+    # find external variable files corresponding to input files
+    external_dict = {}
+    for input_file in input_files:
+        tag = input_file.replace('/', '').replace('.root', '')
+        external_variable_file = os.path.join(external_variable_dir, tag+'.pkl')
+        if os.path.exists(external_variable_file): external_dict[input_file] = external_variable_file
+        else:
+            external_dict[input_file] = None
+            if verbose:
+                msg = f'WARNING: expected external variable file {external_variable_file} does not exist, returning None.'
+                print(msg)
+    return external_dict
+
+
 def read_external_variables(input_files, external_variable_dir):
     # read external variables
     # note: preliminary implementation, to make more robust
     temp = []
     variable_names = None
-    for input_file in input_files:
-        tag = input_file.replace('/', '').replace('.root', '')
-        external_variable_file = os.path.join(external_variable_dir, tag+'.pkl')
-        if not os.path.exists(external_variable_file):
-            raise Exception(f'Expected external variable file {external_variable_file} does not exist.')
-        with open(external_variable_file, 'rb') as f:
+    external_file_dict = find_external_files(input_files, external_variable_dir)
+    for input_file, external_file in external_file_dict.items():
+        if external_file is None or not os.path.exists(external_file):
+            raise Exception(f'Expected external variable file {external_file} does not exist.')
+        with open(external_file, 'rb') as f:
             content = pickle.load(f)
         temp.append(content)
         # check if variable names are consistent

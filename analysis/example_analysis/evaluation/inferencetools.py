@@ -64,11 +64,17 @@ def add_variables(events, names_only=False):
           'input_names': [
             'JetsConstituents_pt', 'JetsConstituents_e',
             'JetsConstituents_thetarel', 'JetsConstituents_phirel',
+            'JetsConstituents_pz',
             'Jets_pt', 'Jets_e', 'Jets_mass',
             'SecondaryVertices_chi2Normalized',
             'SecondaryVertices_p',
             'SecondaryVertices_thetarel',
-            'SecondaryVertices_phirel'
+            'SecondaryVertices_phirel',
+            'JetsConstituents_charge',
+            'JetsConstituents_isChargedHad',
+            'JetsConstituents_dEdx_wires_value',
+            'JetsConstituents_PID_pval_wires_kaon',
+            'JetsConstituents_PID_pval_wires_pi'
           ],
           'output_names': [
             'JetsConstituents_mask',
@@ -80,7 +86,10 @@ def add_variables(events, names_only=False):
             'SecondaryVertices_px_proxy',
             'SecondaryVertices_py_proxy',
             'SecondaryVertices_pz_proxy',
-            'SecondaryVertices_e_proxy'
+            'SecondaryVertices_e_proxy',
+            'JetsConstituents_dEdx_wires_value_masked',
+            'JetsConstituents_PID_pval_wires_kaon_masked',
+            'JetsConstituents_PID_pval_wires_pi_masked'
           ]
         }
         return names
@@ -98,6 +107,11 @@ def add_variables(events, names_only=False):
     events['SecondaryVertices_py_proxy'] = np.multiply(events['SecondaryVertices_pt_proxy'], np.sin(events['SecondaryVertices_phirel']))
     events['SecondaryVertices_pz_proxy'] = np.multiply(events['SecondaryVertices_p'], np.cos(events['SecondaryVertices_thetarel']))
     events['SecondaryVertices_e_proxy'] = np.sqrt(np.square(events['SecondaryVertices_px_proxy']) + np.square(events['SecondaryVertices_py_proxy']) + np.square(events['SecondaryVertices_pz_proxy']) + np.square(events['SecondaryVertices_mass']))
+    JetsConstituents_p = np.sqrt(np.square(events['JetsConstituents_pt']) + np.square(events['JetsConstituents_pz'])) # auxiliary variable
+    JetsConstituents_dedx_mask = ((JetsConstituents_p>1) & (np.abs(events['JetsConstituents_charge'])>0) & (events['JetsConstituents_dEdx_wires_value']>0.8) & (events['JetsConstituents_isChargedHad']>0.5))
+    events['JetsConstituents_dEdx_wires_value_masked'] = np.where(JetsConstituents_dedx_mask, events['JetsConstituents_dEdx_wires_value'], 0)
+    events['JetsConstituents_PID_pval_wires_kaon_masked'] = np.where(JetsConstituents_dedx_mask, events['JetsConstituents_PID_pval_wires_kaon'], 0)
+    events['JetsConstituents_PID_pval_wires_pi_masked'] = np.where(JetsConstituents_dedx_mask, events['JetsConstituents_PID_pval_wires_pi'], 0)
     return events
 
 
@@ -145,7 +159,8 @@ def infer_jets(jets, modelname, prepdict, translation=None, batch_size=None):
 
     # get the data in correct format
     data = preprocess_jets(jets, prepdict, translation=translation)
-    if 'part' in modelname:
+    #if 'part' in modelname:
+    if True: # now set to true by default since "part" is not always in model name...
         # (somehow some keys are missing in the onnx model inputs; not clear if this is expected,
         # or if the model will be evaluated correctly without it, but seems to be fine...)
         if 'points' in data.keys(): data.pop('points')

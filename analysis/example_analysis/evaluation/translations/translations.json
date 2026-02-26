@@ -59,6 +59,10 @@
   "pfcand_PID_pval_wires_kaon": "JetsConstituents_PID_pval_wires_kaon",
   "pfcand_PID_pval_wires_proton": "JetsConstituents_PID_pval_wires_proton",
 
+  "pfcand_dEdx_wires_value_masked": "JetsConstituents_dEdx_wires_value_masked",
+  "pfcand_PID_pval_wires_kaon_masked": "JetsConstituents_PID_pval_wires_kaon_masked",
+  "pfcand_PID_pval_wires_pi_masked": "JetsConstituents_PID_pval_wires_pi_masked",
+
   "sv_px_proxy": "SecondaryVertices_px_proxy",
   "sv_py_proxy": "SecondaryVertices_py_proxy",
   "sv_pz_proxy": "SecondaryVertices_pz_proxy",

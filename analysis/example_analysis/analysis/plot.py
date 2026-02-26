@@ -32,6 +32,7 @@ from analysis.objectselection import apply_objectselection
 from analysis.systematics import get_weight_variation
 from analysis.systematics import format_systematic_name
 from analysis.external_variables import read_external_variables
+from analysis.external_variables import find_external_files
 from plotting.plot import plot
 
 # global pyplot settings
@@ -137,8 +138,17 @@ def make_histograms(datastruct, variables,
             for batch_idx, batch_sampledict in enumerate(this_batches):
                 print(f'Reading batch {batch_idx+1} / {len(this_batches)}...')
                 if do_read_events:
+
+                    # temp: skip files that do not have their corresponding external variable file.
+                    # in most cases, an error should be thrown in this case, but suppress for quick tests
+                    if external_variables is not None:
+                        external_file_dict = find_external_files(batch_sampledict[process_key], external_variables, verbose=True)
+                        batch_sampledict[process_key] = [k for k, v in external_file_dict.items() if v is not None]
+
+                    # read events
                     events = read_sampledict(batch_sampledict, treename=treename,
                                branches=this_branches_to_read, verbose=False)
+
                 else: events = {process_key: files}
                 print(f'Read batch with {len(events[process_key])} entries'
                         + f' and {len(events[process_key].fields)} branches.')
@@ -331,6 +341,12 @@ def make_events(dtypedict,
         for process_key, files in sampledict.items():
             print(f'Now running on sample {process_key}...')
 
+            # temp: skip files that do not have their corresponding external variable file.
+            # in most cases, an error should be thrown in this case, but suppress for quick tests
+            if external_variables is not None:
+                external_file_dict = find_external_files(files, external_variables, verbose=True)
+                files = [k for k, v in external_file_dict.items() if v is not None]
+
             # read events
             this_sampledict = {process_key: files}
             print(f'Reading events...')
@@ -429,7 +445,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
         colordict['qqb'] = 'grey'
         colordict['light'] = 'grey'
         colordict['uudd'] = 'paleturquoise'
-        colordict['ss'] = 'lightskyblue'
+        colordict['ss'] = 'dodgerblue'
         colordict['cc'] = 'slateblue'
         colordict['bb'] = 'darkorchid'
 
@@ -524,12 +540,16 @@ def plot_hists_default(hists_combined, variables, outputdir,
             # set y-axis title
             yaxtitle = 'Events'
             if variable.variable.startswith('Jets_'): yaxtitle = 'Jets'
+            if variable.variable.startswith('JetsConstituents_'): yaxtitle = 'Jet constituents'
+            if variable.variable.startswith('SecondaryVertices_'): yaxtitle = 'Vertices'
             include_binwidth = True # maybe later add as argument
             if include_binwidth:
                 if variable.unit is not None and len(variable.unit)>0:
                     bins = variable.bins
                     binwidths = bins[1:] - bins[:-1]
                     unique_binwidths = list(set(binwidths))
+                    unique_binwidths = ([unique_binwidths[0]]
+                        + [el for el in unique_binwidths[1:] if abs(el-unique_binwidths[0])/unique_binwidths[0] > 1e-6])
                     if len(unique_binwidths)==1:
                         binwidth = unique_binwidths[0]
                         binwidthtxt = '{:.2f}'.format(binwidth)
@@ -560,7 +580,9 @@ def plot_hists_default(hists_combined, variables, outputdir,
 
             # some more plot aesthetics
             axs[0].set_ylim((0, axs[0].get_ylim()[1]*1.4))
-            axs[0].legend(loc='upper right', fontsize=17, ncols=1)
+            ncols = 1
+            if 'score_isB' in variable.variable: ncols = 3 # dirty hard-coded hack
+            axs[0].legend(loc='upper right', fontsize=17, ncols=ncols)
             #if len(regions.keys())>1:
             #    axs[0].text(0.05, 0.9, region_name, ha='left', va='top', fontsize=12,
             #        transform=axs[0].transAxes)
@@ -582,6 +604,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
             figname = os.path.join(outputdir, figname)
             if not os.path.exists(outputdir): os.makedirs(outputdir)
             fig.savefig(figname)
+            fig.savefig(figname.replace('.png', '.pdf'))
             plt.close(fig)
             print(f'Figure saved to {figname}.')
             del axs
@@ -613,7 +636,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
                     if not normalize: ymin = np.min(histarray[np.nonzero(histarray)])
                     else: ymin = axs[0].get_ylim()[0]
                     axs[0].set_ylim((ymin, axs[0].get_ylim()[1]**1.4))
-                axs[0].legend(loc='upper right', fontsize=17, ncols=1)
+                axs[0].legend(loc='upper right', fontsize=17, ncols=ncols)
                 #if len(regions.keys())>1:
                 #    axs[0].text(0.05, 0.9, region_name, ha='left', va='top', fontsize=12,
                 #        transform=axs[0].transAxes)
@@ -634,6 +657,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
                 figname = region_name + '_' + variable.name + '_log.png'
                 figname = os.path.join(outputdir, figname)
                 fig.savefig(figname)
+                fig.savefig(figname.replace('.png', '.pdf'))
                 plt.close(fig)
                 print(f'Figure saved to {figname}.')
                 del axs
