@@ -182,3 +182,5 @@ ROOT::VecOps::RVec<ROOT::VecOps::RVec<double>> getCorrectedInvMass(
     }
     return result;
 }
+
+}
