@@ -562,6 +562,13 @@ double get_PV2V0angle(FCCAnalysesVertex V0, FCCAnalysesVertex PV) {
   double r_mag = r_V0_PV.Mag();
 
   result = pDOTr / (p_mag * r_mag);
+
+  /*std::cout << "in PV2V0" << std::endl;
+  std::cout << pDOTr << std::endl;
+  std::cout << p_mag << std::endl;
+  std::cout << r_mag << std::endl;
+  std::cout << result << std::endl;*/
+
   return result;
 }
 
@@ -1004,6 +1011,13 @@ get_pointingangle_SV(ROOT::VecOps::RVec<FCCAnalysesVertex> vertices,
         continue;
     }
     iresult = pDOTr / (p_mag * r_mag);
+
+    /*std::cout << "in get_pointingangle_SV" << std::endl;
+    std::cout << pDOTr << std::endl;
+    std::cout << p_mag << std::endl;
+    std::cout << r_mag << std::endl;
+    std::cout << iresult << std::endl;*/
+
     result.push_back(iresult);
   }
   return result;
@@ -1600,7 +1614,8 @@ ROOT::VecOps::RVec<ROOT::VecOps::RVec<double>> get_pointingangle_SV(
 
       edm4hep::Vector3f r_vtx = ivtx.vertex.position; // in mm
 
-      TVector3 r_vtx_PV(r_vtx[0] - r_vtx[0], r_vtx[1] - r_PV[1],
+      TVector3 r_vtx_PV(r_vtx[0] - r_PV[0],
+                        r_vtx[1] - r_PV[1],
                         r_vtx[2] - r_PV[2]);
 
       double pDOTr = p_sum.Dot(r_vtx_PV);

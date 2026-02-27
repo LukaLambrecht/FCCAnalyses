@@ -590,9 +590,6 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
       // Ks
       if(V0_cand[0]>constraints_ks[0] && V0_cand[0]<constraints_ks[1] && V0_cand[4]>constraints_ks[2] && V0_cand[5]>constraints_ks[3]) {
 	    if(debug_me) std::cout<<"Found a Ks"<<std::endl;
-	    std::cout << "Found a Ks" << std::endl;
-        std::cout << V0_cand[5] << std::endl;
-        std::cout << constraints_ks[3] << std::endl;
         isInV0[i] = true;
 	    isInV0[j] = true;
 	    vtx.push_back(V0_vtx);
