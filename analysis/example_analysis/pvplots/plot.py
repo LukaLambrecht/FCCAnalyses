@@ -8,6 +8,7 @@ import argparse
 import numpy as np
 import awkward as ak
 import matplotlib.pyplot as plt
+import scipy
 from scipy.optimize import curve_fit
 
 thisdir = os.path.abspath(os.path.dirname(__file__))
@@ -102,6 +103,8 @@ def plot_hists(hists_combined, variables, outputdir,
             bincenters = (bins[:-1] + bins[1:]) / 2
             def gauss(x, a, mu, sigma):
                 return a * np.exp(-0.5*np.square((x-mu)/sigma))
+            def studentt(x, a, mu, sigma, nu):
+                return a * scipy.stats.t.pdf(x, nu, mu, sigma)
             process_widths = {}
             fitted_functions = {}
             for process_key, hist in hists_sim_nominal.items():
@@ -109,10 +112,19 @@ def plot_hists(hists_combined, variables, outputdir,
                 a_init = np.amax(counts)
                 mu_init = bincenters[np.argmax(counts)]
                 sigma_init = mu_init - bincenters[np.nonzero(counts > a_init/2)[0][0]]
-                fitresult = curve_fit(gauss, bincenters, counts, p0=[a_init, mu_init, sigma_init])
-                a, mu, sigma = fitresult[0]
+
+                # gaussian fit
+                #fitresult = curve_fit(gauss, bincenters, counts, p0=[a_init, mu_init, sigma_init])
+                #a, mu, sigma = fitresult[0]
+                #process_widths[process_key] = sigma
+                #fitted_functions[process_key] = gauss(bincenters, a, mu, sigma)
+
+                # student t fit
+                nu_init = 10
+                fitresult = curve_fit(studentt, bincenters, counts, p0=[a_init, mu_init, sigma_init, nu_init])
+                a, mu, sigma, nu = fitresult[0]
                 process_widths[process_key] = sigma
-                fitted_functions[process_key] = gauss(bincenters, a, mu, sigma)
+                fitted_functions[process_key] = studentt(bincenters, a, mu, sigma, nu)
 
             # concatenate all histograms in a single array (for later use)
             histarray = [h[0] for h in hists_sim_nominal.values()]
@@ -184,11 +196,11 @@ def plot_hists(hists_combined, variables, outputdir,
                         binwidth = unique_binwidths[0]
                         # specific hack for this specific case
                         binwidth = int(round(1e4*binwidth))
-                        variable.unit = r'$\mu m$'
+                        variable_yax_unit = r'$\mu m$'
                         # continue generic approach
                         binwidthtxt = '{:.2f}'.format(binwidth)
                         if binwidth.is_integer(): binwidthtxt = str(int(binwidth))
-                        yaxtitle += f' / {binwidthtxt} {variable.unit}'
+                        yaxtitle += f' / {binwidthtxt} {variable_yax_unit}'
                     else: yaxtitle += ' / Bin'
                 else: yaxtitle += ' / Bin'
             if normalize: yaxtitle += ' (normalized)'

@@ -5,6 +5,7 @@ import awkward as ak
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
 
 # global pyplot settings
 plt.rc("text", usetex=True)
@@ -218,11 +219,13 @@ if __name__=='__main__':
             fig.tight_layout()
             outputfile = os.path.join(outputdir, f'dedx_{system}_scatter.png')
             fig.savefig(outputfile)
+            fig.savefig(outputfile.replace('.png', '.pdf'))
 
         # make 1D histograms in slices of momentum
         for pidx in range(len(pbins)-1):
             plow = pbins[pidx]
             phigh = pbins[pidx+1]
+            print(f'Now running on pT bin {plow} - {phigh}...')
 
             # set binning
             vbins = np.linspace(0.5, 2, num=51)
@@ -232,20 +235,45 @@ if __name__=='__main__':
             # make the figure
             fig, ax = plt.subplots()
             for category_label, data in category_data.items():
+                
                 # get values
                 p = data[0]
                 mask = ((p > plow) & (p < phigh))
                 values = data[1][mask]
+                label = labeldict[category_label]
+                
                 # make histogram
                 hist = np.histogram(values, bins=vbins)[0]
                 errors = np.sqrt(hist)
                 binwidths = vbins[1:] - vbins[:-1]
+                bincenters = (vbins[:-1] + vbins[1:]) / 2
                 integral = np.sum(np.multiply(hist, binwidths))
                 hist = hist.astype(float) / integral
                 errors = errors.astype(float) / integral
+                
+                # optional: fit a gaussian
+                dofit = (category_label in ['pion', 'kaon'])
+                doplotfit = True
+                if dofit:
+                    def gauss(x, a, mu, sigma):
+                        return a * np.exp(-0.5*np.square((x-mu)/sigma))
+                    a_init = np.amax(hist)
+                    mu_init = bincenters[np.argmax(hist)]
+                    sigma_init = mu_init - bincenters[np.nonzero(hist > a_init/2)[0][0]]
+                    fitresult = curve_fit(gauss, bincenters, hist, p0=[a_init, mu_init, sigma_init])
+                    a, mu, sigma = fitresult[0]
+                    mutxt = '{:.2f}'.format(mu)
+                    sigmatxt = '{:.2f}'.format(sigma)
+                    label += r' ($\mu = ' + mutxt + r'$, $\sigma = ' + sigmatxt + r'$)'
+                    fitted_function = gauss(bincenters, a, mu, sigma)
+
                 # plot histogram
                 ax.stairs(hist+errors, baseline=hist-errors, edges=vbins, fill=True, color=colordict[category_label], alpha=0.3)
-                ax.stairs(hist, edges=vbins, label=labeldict[category_label], color=colordict[category_label], alpha=1, linewidth=2)
+                ax.stairs(hist, edges=vbins, label=label, color=colordict[category_label], alpha=1, linewidth=2)
+
+                # optional: plot the fitted function
+                if dofit and doplotfit:
+                    ax.plot(bincenters, fitted_function, color='red', linestyle=':')
 
             # plot aesthetics
             ax.set_ylabel('Number of particles (normalized)', fontsize=17)
@@ -284,5 +312,6 @@ if __name__=='__main__':
             fig.tight_layout()
             outputfile = os.path.join(outputdir, f'dedx_{system}_pslice_{plow}_{phigh}.png')
             fig.savefig(outputfile)
+            fig.savefig(outputfile.replace('.png', '.pdf'))
             plt.close()
 
