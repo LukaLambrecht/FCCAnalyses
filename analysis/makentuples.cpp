@@ -115,11 +115,22 @@ int main(int argc, char* argv[]) {
 
   // V0 candidates properties
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_pdgId = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_xrel = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_yrel = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_zrel = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_thetarel = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_phirel = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_p = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_prel = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_chi2 = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_chi2Normalized = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_ndof = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_nTracks = 0;
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_mass = 0;
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_dxy = 0;
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_dxyz = 0;
-  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_chi2 = 0;
-  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_chi2Normalized = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_cosPointing = 0;
+  ROOT::VecOps::RVec<ROOT::VecOps::RVec<float>> *V0Candidates_correctedMass = 0;
  
   // jet constituent properties
   ROOT::VecOps::RVec<ROOT::VecOps::RVec<float> > *JetsConstituents_e = 0;
@@ -276,12 +287,22 @@ int main(int argc, char* argv[]) {
 
   // V0 candidates properties
   ev->SetBranchAddress("V0Candidates_pdgId", &V0Candidates_pdgId);
+  ev->SetBranchAddress("V0Candidates_xrel", &V0Candidates_xrel);
+  ev->SetBranchAddress("V0Candidates_yrel", &V0Candidates_yrel);
+  ev->SetBranchAddress("V0Candidates_zrel", &V0Candidates_zrel);
+  ev->SetBranchAddress("V0Candidates_thetarel", &V0Candidates_thetarel);
+  ev->SetBranchAddress("V0Candidates_phirel", &V0Candidates_phirel);
+  ev->SetBranchAddress("V0Candidates_p", &V0Candidates_p);
+  ev->SetBranchAddress("V0Candidates_prel", &V0Candidates_prel);
+  ev->SetBranchAddress("V0Candidates_chi2", &V0Candidates_chi2);
+  ev->SetBranchAddress("V0Candidates_chi2Normalized", &V0Candidates_chi2Normalized);
+  ev->SetBranchAddress("V0Candidates_ndof", &V0Candidates_ndof);
+  ev->SetBranchAddress("V0Candidates_nTracks", &V0Candidates_nTracks);
   ev->SetBranchAddress("V0Candidates_mass", &V0Candidates_mass);
   ev->SetBranchAddress("V0Candidates_dxy", &V0Candidates_dxy);
   ev->SetBranchAddress("V0Candidates_dxyz", &V0Candidates_dxyz);
-  ev->SetBranchAddress("V0Candidates_chi2", &V0Candidates_chi2);
-  ev->SetBranchAddress("V0Candidates_chi2Normalized", &V0Candidates_chi2Normalized);
-
+  ev->SetBranchAddress("V0Candidates_cosPointing", &V0Candidates_cosPointing);
+  ev->SetBranchAddress("V0Candidates_correctedMass", &V0Candidates_correctedMass);
 
   // jet constituent properties
   ev->SetBranchAddress("JetsConstituents_e", &JetsConstituents_e);
@@ -452,11 +473,22 @@ int main(int argc, char* argv[]) {
 
   // V0 candidate variables
   float v0cand_pdgId[1000] = {0.};
+  float v0cand_xrel[1000] = {0.};
+  float v0cand_yrel[1000] = {0.};
+  float v0cand_zrel[1000] = {0.};
+  float v0cand_thetarel[1000] = {0.};
+  float v0cand_phirel[1000] = {0.};
+  float v0cand_p[1000] = {0.};
+  float v0cand_prel[1000] = {0.};
+  float v0cand_chi2[1000] = {0.};
+  float v0cand_chi2Normalized[1000] = {0.};
+  float v0cand_ndof[1000] = {0.};
+  float v0cand_nTracks[1000] = {0.};
   float v0cand_mass[1000] = {0.};
   float v0cand_dxy[1000] = {0.};
   float v0cand_dxyz[1000] = {0.};
-  float v0cand_chi2[1000] = {0.};
-  float v0cand_chi2Normalized[1000] = {0.};
+  float v0cand_cosPointing[1000] = {0.};
+  float v0cand_correctedMass[1000] = {0.};
 
   // jet constituent variables
   float pfcand_e[1000] = {0.};
@@ -635,11 +667,22 @@ int main(int argc, char* argv[]) {
 
   // V0 candidate variables
   ntuple->Branch("v0cand_pdgId", v0cand_pdgId, "v0cand_pdgId[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_xrel", v0cand_xrel, "v0cand_xrel[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_yrel", v0cand_yrel, "v0cand_yrel[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_zrel", v0cand_zrel, "v0cand_zrel[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_thetarel", v0cand_thetarel, "v0cand_thetarel[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_phirel", v0cand_phirel, "v0cand_phirel[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_p", v0cand_p, "v0cand_p[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_prel", v0cand_prel, "v0cand_prel[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_chi2", v0cand_chi2, "v0cand_chi2[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_chi2Normalized", v0cand_chi2Normalized, "v0cand_chi2Normalized[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_ndof", v0cand_ndof, "v0cand_ndof[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_nTracks", v0cand_nTracks, "v0cand_nTracks[recojet_nv0candidates]/F");
   ntuple->Branch("v0cand_mass", v0cand_mass, "v0cand_mass[recojet_nv0candidates]/F");
   ntuple->Branch("v0cand_dxy", v0cand_dxy, "v0cand_dxy[recojet_nv0candidates]/F");
   ntuple->Branch("v0cand_dxyz", v0cand_dxyz, "v0cand_dxyz[recojet_nv0candidates]/F");
-  ntuple->Branch("v0cand_chi2", v0cand_chi2, "v0cand_chi2[recojet_nv0candidates]/F");
-  ntuple->Branch("v0cand_chi2Normalized", v0cand_chi2Normalized, "v0cand_chi2Normalized[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_cosPointing", v0cand_cosPointing, "v0cand_cosPointing[recojet_nv0candidates]/F");
+  ntuple->Branch("v0cand_correctedMass", v0cand_correctedMass, "v0cand_correctedMass[recojet_nv0candidates]/F");
 
   // jet constituent variables
   ntuple->Branch("pfcand_e", pfcand_e, "pfcand_e[nconst]/F");
@@ -856,11 +899,22 @@ int main(int argc, char* argv[]) {
       // loop over V0 candidates
       for(int k=0; k < recojet_nv0candidates; k++){
           v0cand_pdgId[k] = (V0Candidates_pdgId->at(j))[k];
+          v0cand_xrel[k] = (V0Candidates_xrel->at(j))[k];
+          v0cand_yrel[k] = (V0Candidates_yrel->at(j))[k];
+          v0cand_zrel[k] = (V0Candidates_zrel->at(j))[k];
+          v0cand_thetarel[k] = (V0Candidates_thetarel->at(j))[k];
+          v0cand_phirel[k] = (V0Candidates_phirel->at(j))[k];
+          v0cand_p[k] = (V0Candidates_p->at(j))[k];
+          v0cand_prel[k] = (V0Candidates_prel->at(j))[k];
+          v0cand_chi2[k] = (V0Candidates_chi2->at(j))[k];
+          v0cand_chi2Normalized[k] = (V0Candidates_chi2Normalized->at(j))[k];
+          v0cand_ndof[k] = (V0Candidates_ndof->at(j))[k];
+          v0cand_nTracks[k] = (V0Candidates_nTracks->at(j))[k];
           v0cand_mass[k] = (V0Candidates_mass->at(j))[k];
           v0cand_dxy[k] = (V0Candidates_dxy->at(j))[k];
           v0cand_dxyz[k] = (V0Candidates_dxyz->at(j))[k];
-          v0cand_chi2[k] = (V0Candidates_chi2->at(j))[k];
-          v0cand_chi2Normalized[k] = (V0Candidates_chi2Normalized->at(j))[k];
+          v0cand_cosPointing[k] = (V0Candidates_cosPointing->at(j))[k];
+          v0cand_correctedMass[k] = (V0Candidates_correctedMass->at(j))[k];
       }
       
       // loop over constituents

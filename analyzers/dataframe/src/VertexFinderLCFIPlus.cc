@@ -590,7 +590,10 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
       // Ks
       if(V0_cand[0]>constraints_ks[0] && V0_cand[0]<constraints_ks[1] && V0_cand[4]>constraints_ks[2] && V0_cand[5]>constraints_ks[3]) {
 	    if(debug_me) std::cout<<"Found a Ks"<<std::endl;
-	    isInV0[i] = true;
+	    std::cout << "Found a Ks" << std::endl;
+        std::cout << V0_cand[5] << std::endl;
+        std::cout << constraints_ks[3] << std::endl;
+        isInV0[i] = true;
 	    isInV0[j] = true;
 	    vtx.push_back(V0_vtx);
 	    pdgAbs.push_back(310);
@@ -887,8 +890,8 @@ ROOT::VecOps::RVec<double> constraints_Ks(bool tight) {
   }
 
   else {
-    result[0] = 0.478; // originally 0.488;
-    result[1] = 0.518; // originally 0.508;
+    result[0] = 0.3; // originally 0.488;
+    result[1] = 0.7; // originally 0.508;
     result[2] = 0.1; // originally 0.3 [mm]
     result[3] = 0.999;
   }
@@ -908,8 +911,8 @@ ROOT::VecOps::RVec<double> constraints_Lambda0(bool tight) {
   }
 
   else {
-    result[0] = 1.106;
-    result[1] = 1.126;
+    result[0] = 0.9; // originally 1.106;
+    result[1] = 1.3; // originally 1.126;
     result[2] = 0.1; // originally 0.3 [mm]
     result[3] = 0.999;
   }
@@ -928,7 +931,7 @@ ROOT::VecOps::RVec<double> constraints_Gamma(bool tight) {
   }
 
   else {
-    result[1] = 0.01;
+    result[1] = -1; // originally 0.01;
     result[2] = 0.9; // originally 9 [mm]
     result[3] = 0.999;
   }

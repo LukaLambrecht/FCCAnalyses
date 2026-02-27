@@ -544,15 +544,27 @@ class RDFanalysis():
             # reconstruct all V0 candidates in the event
             # note: arguments are (in order): tracks, primary vertex, whether to use tight constraints, chi2 threshold
             .Define("EventV0s", "FCCAnalyses::VertexFinderLCFIPlus::get_V0s(SecondaryTracks, PrimaryVertexObject, false, 10.)")
+            .Define("V0Candidates", "SecondaryVertexTools::distributeSecondaryVerticesOverJets(EventV0s.vtx, jets_ee_genkt)")
             .Define("v0_jet_ids", "SecondaryVertexTools::getSecondaryVertexJetIndices(EventV0s.vtx, jets_ee_genkt)")
 
             # calculate properties of V0 candidates to store
             .Define("V0Candidates_pdgId", "SecondaryVertexTools::distributeOverJets(EventV0s.pdgAbs, v0_jet_ids)")
+            .Define("V0Candidates_xrel", "FCCAnalyses::VertexingUtils::get_xrel_SV_jets(V0Candidates, PrimaryVertexP3)")
+            .Define("V0Candidates_yrel", "FCCAnalyses::VertexingUtils::get_yrel_SV_jets(V0Candidates, PrimaryVertexP3)")
+            .Define("V0Candidates_zrel", "FCCAnalyses::VertexingUtils::get_zrel_SV_jets(V0Candidates, PrimaryVertexP3)")
+            .Define("V0Candidates_thetarel", "FCCAnalyses::VertexingUtils::get_relTheta_SV(V0Candidates, jets_ee_genkt)")
+            .Define("V0Candidates_phirel", "FCCAnalyses::VertexingUtils::get_relPhi_SV(V0Candidates, jets_ee_genkt)")
+            .Define("V0Candidates_p", "FCCAnalyses::VertexingUtils::get_pMag_SV_jets(V0Candidates)")
+            .Define("V0Candidates_prel", "FCCAnalyses::VertexingUtils::get_prel_SV_jets(V0Candidates, jets_ee_genkt)")
+            .Define("V0Candidates_chi2", "FCCAnalyses::VertexingUtils::get_chi2_SV_jets(V0Candidates)")
+            .Define("V0Candidates_chi2Normalized", "FCCAnalyses::VertexingUtils::get_norm_chi2_SV_jets(V0Candidates)")
+            .Define("V0Candidates_ndof", "FCCAnalyses::VertexingUtils::get_nDOF_SV_jets(V0Candidates)")
+            .Define("V0Candidates_nTracks", "FCCAnalyses::VertexingUtils::get_VertexNtrk(V0Candidates)")
             .Define("V0Candidates_mass", "SecondaryVertexTools::distributeOverJets(EventV0s.invM, v0_jet_ids)")
-            .Define("V0Candidates_dxy", "SecondaryVertexTools::distributeOverJets(SecondaryVertexTools::get_dxy(EventV0s, PrimaryVertexObject), v0_jet_ids)")
-            .Define("V0Candidates_dxyz", "SecondaryVertexTools::distributeOverJets(SecondaryVertexTools::get_dxyz(EventV0s, PrimaryVertexObject), v0_jet_ids)")
-            .Define("V0Candidates_chi2", "SecondaryVertexTools::distributeOverJets(SecondaryVertexTools::get_chi2(EventV0s), v0_jet_ids)")
-            .Define("V0Candidates_chi2Normalized", "SecondaryVertexTools::distributeOverJets(SecondaryVertexTools::get_chi2Normalized(EventV0s), v0_jet_ids)")
+            .Define("V0Candidates_dxy", "FCCAnalyses::VertexingUtils::get_dxy_SV(V0Candidates, PrimaryVertexObject)")
+            .Define("V0Candidates_dxyz", "FCCAnalyses::VertexingUtils::get_d3d_SV(V0Candidates, PrimaryVertexObject)")
+            .Define("V0Candidates_cosPointing", "FCCAnalyses::VertexingUtils::get_pointingangle_SV(V0Candidates, PrimaryVertexObject)")
+            .Define("V0Candidates_correctedMass", "SecondaryVertexTools::getCorrectedInvMass(V0Candidates, PrimaryVertexObject)")
 
             # store counters
             .Define("Event_nV0Candidates", "EventV0s.vtx.size()")
@@ -910,11 +922,22 @@ class RDFanalysis():
             'Jets_nKsCandidates',
             'Jets_nLambdaCandidates',
             'V0Candidates_pdgId',
+            'V0Candidates_xrel',
+            'V0Candidates_yrel',
+            'V0Candidates_zrel',
+            'V0Candidates_thetarel',
+            'V0Candidates_phirel',
+            'V0Candidates_p',
+            'V0Candidates_prel',
+            'V0Candidates_chi2',
+            'V0Candidates_chi2Normalized',
+            'V0Candidates_ndof',
+            'V0Candidates_nTracks',
             'V0Candidates_mass',
             'V0Candidates_dxy',
             'V0Candidates_dxyz',
-            'V0Candidates_chi2',
-            'V0Candidates_chi2Normalized',
+            'V0Candidates_cosPointing',
+            'V0Candidates_correctedMass',
           ]
 
         # jet-constituent-level variables
