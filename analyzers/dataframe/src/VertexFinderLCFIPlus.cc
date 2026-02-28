@@ -586,6 +586,10 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
       // try to make a V0 candidate
       ROOT::VecOps::RVec<double> V0_cand = get_V0candidate(V0_vtx, tr_pair, PV, true, chi2_cut);
       if(V0_cand[0] == -1) continue;
+
+      // decide which one it is
+      // update: now allow a candidate to be identified as more than one type,
+      // e.g. a kaon under the pi-pi hypothesis but also a lambda under the pi-p hypothesis.
       
       // Ks
       if(V0_cand[0]>constraints_ks[0] && V0_cand[0]<constraints_ks[1] && V0_cand[4]>constraints_ks[2] && V0_cand[5]>constraints_ks[3]) {
@@ -595,38 +599,38 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
 	    vtx.push_back(V0_vtx);
 	    pdgAbs.push_back(310);
 	    invM.push_back(V0_cand[0]);
-	    break;
+	    //break;
       }
       
       // Lambda0
-      else if(V0_cand[1]>constraints_lambda0[0] && V0_cand[1]<constraints_lambda0[1] && V0_cand[4]>constraints_lambda0[2] && V0_cand[5]>constraints_lambda0[3]) {
+      if(V0_cand[1]>constraints_lambda0[0] && V0_cand[1]<constraints_lambda0[1] && V0_cand[4]>constraints_lambda0[2] && V0_cand[5]>constraints_lambda0[3]) {
 	    if(debug_me) std::cout<<"Found a Lambda0"<<std::endl;
 	    isInV0[i] = true;
 	    isInV0[j] = true;
 	    vtx.push_back(V0_vtx);
 	    pdgAbs.push_back(3122);
 	    invM.push_back(V0_cand[1]);
-	    break;
+	    //break;
       }
-      else if(V0_cand[2]>constraints_lambda0[0] && V0_cand[2]<constraints_lambda0[1] && V0_cand[4]>constraints_lambda0[2] && V0_cand[5]>constraints_lambda0[3]) {
+      if(V0_cand[2]>constraints_lambda0[0] && V0_cand[2]<constraints_lambda0[1] && V0_cand[4]>constraints_lambda0[2] && V0_cand[5]>constraints_lambda0[3]) {
 	    if(debug_me) std::cout<<"Found a Lambda0"<<std::endl;
 	    isInV0[i] = true;
 	    isInV0[j] = true;
 	    vtx.push_back(V0_vtx);
 	    pdgAbs.push_back(3122);
 	    invM.push_back(V0_cand[2]);
-	    break;
+	    //break;
       }
 	
       // photon conversion
-      else if(V0_cand[3]<constraints_gamma[1] && V0_cand[4]>constraints_gamma[2] && V0_cand[5]>constraints_gamma[3]) {
+      if(V0_cand[3]<constraints_gamma[1] && V0_cand[4]>constraints_gamma[2] && V0_cand[5]>constraints_gamma[3]) {
 	    if(debug_me) std::cout<<"Found a Photon coversion"<<std::endl;
 	    isInV0[i] = true;
 	    isInV0[j] = true;
 	    vtx.push_back(V0_vtx);
 	    pdgAbs.push_back(22);
 	    invM.push_back(V0_cand[3]);
-	    break;
+	    //break;
       }
     }
   } // end of loop over track pairs
@@ -880,15 +884,15 @@ ROOT::VecOps::RVec<double> constraints_Ks(bool tight) {
   ROOT::VecOps::RVec<double> result(4, 0);
 
   if(tight) {
-    result[0] = 0.493;
-    result[1] = 0.503;
+    result[0] = 0.453; // widened based on observed Ks resolution in ALEPH; originally 0.493;
+    result[1] = 0.553; // widened based on observed Ks resolution in ALEPH; orginally 0.503;
     result[2] = 0.1; // originally 0.5 [mm]
     result[3] = 0.999;
   }
 
   else {
-    result[0] = 0.3; // originally 0.488;
-    result[1] = 0.7; // originally 0.508;
+    result[0] = 0.1; // widended to include sideband; originally 0.488;
+    result[1] = 1.4; // widened to include sideband; originally 0.508;
     result[2] = 0.1; // originally 0.3 [mm]
     result[3] = 0.999;
   }
@@ -901,15 +905,15 @@ ROOT::VecOps::RVec<double> constraints_Lambda0(bool tight) {
   ROOT::VecOps::RVec<double> result(4, 0);
 
   if(tight) {
-    result[0] = 1.111;
-    result[1] = 1.121;
+    result[0] = 1.06; // widened based on observed Lambda resolution in ALEPH; originally 1.111;
+    result[1] = 1.16; // widened based on observed Lambda resolution in ALEPH; originally 1.121;
     result[2] = 0.1; // originally 0.5 [mm]
     result[3] = 0.99995;
   }
 
   else {
-    result[0] = 0.9; // originally 1.106;
-    result[1] = 1.3; // originally 1.126;
+    result[0] = 0.1; // widened to include sideband; originally 1.106;
+    result[1] = 1.4; // widened to include sideband; originally 1.126;
     result[2] = 0.1; // originally 0.3 [mm]
     result[3] = 0.999;
   }
