@@ -70,6 +70,10 @@ def add_variables(events, names_only=False):
             'SecondaryVertices_p',
             'SecondaryVertices_thetarel',
             'SecondaryVertices_phirel',
+            'V0Candidates_chi2Normalized',
+            'V0Candidates_p',
+            'V0Candidates_thetarel',
+            'V0Candidates_phirel',
             'JetsConstituents_charge',
             'JetsConstituents_isChargedHad',
             'JetsConstituents_dEdx_wires_value',
@@ -87,13 +91,22 @@ def add_variables(events, names_only=False):
             'SecondaryVertices_py_proxy',
             'SecondaryVertices_pz_proxy',
             'SecondaryVertices_e_proxy',
+            'V0Candidates_mask',
+            'V0Candidates_pt_proxy',
+            'V0Candidates_px_proxy',
+            'V0Candidates_py_proxy',
+            'V0Candidates_pz_proxy',
+            'V0Candidates_e_proxy',
             'JetsConstituents_dEdx_wires_value_masked',
             'JetsConstituents_PID_pval_wires_kaon_masked',
             'JetsConstituents_PID_pval_wires_pi_masked'
           ]
         }
         return names
+
     # add new variables to events dict
+
+    # basic kinematics
     events['JetsConstituents_mask'] = ak.ones_like(events['JetsConstituents_pt'])
     events['JetsConstituents_pt_log'] = np.log(events['JetsConstituents_pt'])
     events['JetsConstituents_e_log'] = np.log(events['JetsConstituents_e'])
@@ -101,12 +114,24 @@ def add_variables(events, names_only=False):
     events['Jets_pt_log'] = np.log(events['Jets_pt'])
     events['Jets_e_log'] = np.log(events['Jets_e'])
     events['Jets_mass_log'] = np.log(events['Jets_mass'])
+
+    # secondary vertices
     events['SecondaryVertices_mask'] = ( events['SecondaryVertices_chi2Normalized'] > 0. )
     events['SecondaryVertices_pt_proxy'] = np.multiply(events['SecondaryVertices_p'], np.sin(events['SecondaryVertices_thetarel']))
     events['SecondaryVertices_px_proxy'] = np.multiply(events['SecondaryVertices_pt_proxy'], np.cos(events['SecondaryVertices_phirel']))
     events['SecondaryVertices_py_proxy'] = np.multiply(events['SecondaryVertices_pt_proxy'], np.sin(events['SecondaryVertices_phirel']))
     events['SecondaryVertices_pz_proxy'] = np.multiply(events['SecondaryVertices_p'], np.cos(events['SecondaryVertices_thetarel']))
     events['SecondaryVertices_e_proxy'] = np.sqrt(np.square(events['SecondaryVertices_px_proxy']) + np.square(events['SecondaryVertices_py_proxy']) + np.square(events['SecondaryVertices_pz_proxy']) + np.square(events['SecondaryVertices_mass']))
+    
+    # V0 candidates
+    events['V0Candidates_mask'] = ( events['V0Candidates_chi2Normalized'] > 0. )
+    events['V0Candidates_pt_proxy'] = np.multiply(events['V0Candidates_p'], np.sin(events['V0Candidates_thetarel']))
+    events['V0Candidates_px_proxy'] = np.multiply(events['V0Candidates_pt_proxy'], np.cos(events['V0Candidates_phirel']))
+    events['V0Candidates_py_proxy'] = np.multiply(events['V0Candidates_pt_proxy'], np.sin(events['V0Candidates_phirel']))
+    events['V0Candidates_pz_proxy'] = np.multiply(events['V0Candidates_p'], np.cos(events['V0Candidates_thetarel']))
+    events['V0Candidates_e_proxy'] = np.sqrt(np.square(events['V0Candidates_px_proxy']) + np.square(events['V0Candidates_py_proxy']) + np.square(events['V0Candidates_pz_proxy']) + np.square(events['V0Candidates_mass']))
+
+    # dEdx masking
     JetsConstituents_p = np.sqrt(np.square(events['JetsConstituents_pt']) + np.square(events['JetsConstituents_pz'])) # auxiliary variable
     JetsConstituents_dedx_mask = ((JetsConstituents_p>1) & (np.abs(events['JetsConstituents_charge'])>0) & (events['JetsConstituents_dEdx_wires_value']>0.8) & (events['JetsConstituents_isChargedHad']>0.5))
     events['JetsConstituents_dEdx_wires_value_masked'] = np.where(JetsConstituents_dedx_mask, events['JetsConstituents_dEdx_wires_value'], 0)
@@ -166,6 +191,7 @@ def infer_jets(jets, modelname, prepdict, translation=None, batch_size=None):
         if 'points' in data.keys(): data.pop('points')
         if 'pf_points' in data.keys(): data.pop('pf_points')
         if 'sv_points' in data.keys(): data.pop('sv_points')
+        if 'v0_points' in data.keys(): data.pop('v0_points')
 
     # divide in batches
     ndata = data[list(data.keys())[0]].shape[0]
@@ -242,6 +268,7 @@ def infer_events(events, modelname, prepdict, do_add_variables=False, **kwargs):
     jets_vars = [varname for varname in events.fields if varname.startswith('Jets_')]
     constituents_vars = [varname for varname in events.fields if varname.startswith('JetsConstituents_')]
     sv_vars = [varname for varname in events.fields if varname.startswith('SecondaryVertices_')]
+    v0_vars = [varname for varname in events.fields if varname.startswith('V0Candidates_')]
     # check if at least one per-jet variable was provided (needed for flattening and un-flattening)
     if len(jets_vars)==0:
         msg = 'Need at least one per-jet variable in events to get the correct shape for flattening and un-flattening.'
@@ -249,7 +276,7 @@ def infer_events(events, modelname, prepdict, do_add_variables=False, **kwargs):
     # do flattening (needed for inference which is essentially per-jet level)
     jets_shape = ak.num(events[jets_vars[0]])
     jets = {}
-    for varname in constituents_vars + jets_vars + sv_vars:
+    for varname in constituents_vars + jets_vars + sv_vars + v0_vars:
         jets[varname] = ak.flatten(events[varname], axis=1)
     # special handling of batches with no jets
     if len(jets[constituents_vars[0]])==0:

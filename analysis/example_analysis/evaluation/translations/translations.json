@@ -82,5 +82,26 @@
   "sv_chi2": "SecondaryVertices_chi2",
   "sv_chi2Normalized": "SecondaryVertices_chi2Normalized",
   "sv_cosPointing": "SecondaryVertices_cosPointing",
-  "sv_mask": "SecondaryVertices_mask"
+  "sv_mask": "SecondaryVertices_mask",
+
+  "v0cand_px_proxy": "V0Candidates_px_proxy",
+  "v0cand_py_proxy": "V0Candidates_py_proxy",
+  "v0cand_pz_proxy": "V0Candidates_pz_proxy",
+  "v0cand_e_proxy": "V0Candidates_e_proxy",
+  "v0cand_xrel": "V0Candidates_xrel",
+  "v0cand_yrel": "V0Candidates_yrel",
+  "v0cand_zrel": "V0Candidates_zrel",
+  "v0cand_thetarel": "V0Candidates_thetarel",
+  "v0cand_phirel": "V0Candidates_phirel",
+  "v0cand_p": "V0Candidates_p",
+  "v0cand_prel": "V0Candidates_prel",
+  "v0cand_nTracks": "V0Candidates_nTracks",
+  "v0cand_mass": "V0Candidates_mass",
+  "v0cand_correctedMass": "V0Candidates_correctedMass",
+  "v0cand_dxy": "V0Candidates_dxy",
+  "v0cand_dxyz": "V0Candidates_dxyz",
+  "v0cand_chi2": "V0Candidates_chi2",
+  "v0cand_chi2Normalized": "V0Candidates_chi2Normalized",
+  "v0cand_cosPointing": "V0Candidates_cosPointing",
+  "v0cand_mask": "V0Candidates_mask"
 }
