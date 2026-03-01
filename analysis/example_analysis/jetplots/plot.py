@@ -390,6 +390,7 @@ if __name__=='__main__':
             yaxtitle = 'Jets'
             if variable.variable.startswith('pfcand_'): yaxtitle = 'Jet contituents'
             if variable.variable.startswith('sv_'): yaxtitle = 'Secondary vertices'
+            if variable.variable.startswith('v0cand_'): yaxtitle = 'V0 candidates'
             include_binwidth = True # maybe later add as argument
             if include_binwidth:
                 if variable.unit is not None and len(variable.unit)>0:

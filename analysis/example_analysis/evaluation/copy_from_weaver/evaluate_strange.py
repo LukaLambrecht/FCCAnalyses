@@ -30,15 +30,23 @@ if __name__=='__main__':
         's': {
             'label_branch': 'recojet_isS',
             'score_branch': 'score_recojet_isS',
-            'color': 'blue',
             'label': r'$s$-jets'
         }
     }
     background_categories = {
+        'b': {
+            'label_branch': 'recojet_isB',
+            'score_branch': 'score_recojet_isB',
+            'label': r'$b$-jets'
+        },
+        'c': {
+            'label_branch': 'recojet_isC',
+            'score_branch': 'score_recojet_isC',
+            'label': r'$ud$-jets'
+        },
         'ud': {
             'label_branch': 'recojet_isUDG',
             'score_branch': 'score_recojet_isUDG',
-            'color': 'green',
             'label': r'$ud$-jets'
         }
     }
@@ -79,29 +87,36 @@ if __name__=='__main__':
         aucs.append(auc)
 
     # make a plot
-    labels = ['$s$ vs $ud$, all input features', '$s$ vs $ud$, no dE/dx']
-    stylelist = [None, ':']
+    file_to_label = ['all input features', r'no $V^0$', r'no $dE/dx$']
+    file_to_style = [None, '--', ':']
+    key_to_color = {}
+    key_to_color[('s', 'ud')] = 'limegreen'
+    key_to_color[('s', 'c')] = 'lightseagreen'
+    key_to_color[('s', 'b')] = 'deepskyblue'
     fig, ax = plt.subplots()
-    for idx in range(len(args.inputfiles)):
+    for signal_key in signal_categories:
+        for background_key in background_categories:
+            for fileidx in range(len(args.inputfiles)):
+        
+                # get roc curve 
+                key = (signal_key, background_key)
+                signal_category_settings = signal_categories[signal_key]
+                background_category_settings = background_categories[background_key]
+                efficiency_sig, efficiency_bkg = roc_curves[fileidx][key]
+                auc = aucs[fileidx][key]
 
-        # get roc curve 
-        key = ('s', 'ud')
-        signal_category_settings = signal_categories['s']
-        background_category_settings = background_categories['ud']
-        efficiency_sig, efficiency_bkg = roc_curves[idx][key]
-        auc = aucs[idx][key]
-
-        # make a plot of the ROC curve
-        label = labels[idx]
-        label += ' (AUC: {:.2f})'.format(auc)
-        color = 'forestgreen'
-        ax.plot(efficiency_bkg, efficiency_sig,
-        color=color, linewidth=3, label=label, linestyle=stylelist[idx])
+                # make a plot of the ROC curve
+                label = signal_category_settings['label'] + ' vs. ' + background_category_settings['label']
+                label += ', ' + file_to_label[fileidx]
+                label += ' (AUC: {:.2f})'.format(auc)
+                color = key_to_color[key]
+                ax.plot(efficiency_bkg, efficiency_sig,
+                color=color, linewidth=3, label=label, linestyle=file_to_style[fileidx])
 
     # add random guessing line
     dummy_efficiency = np.linspace(0, 1, num=101)
     ax.plot(dummy_efficiency, dummy_efficiency,
-      color='darkblue', linewidth=3, linestyle='--', label='Random guessing')
+    color='darkblue', linewidth=3, linestyle='--', label='Random guessing')
 
     # add aleph logo
     docms = True
@@ -127,7 +142,7 @@ if __name__=='__main__':
     ax.set_ylabel('Signal efficiency', fontsize=22)
     ax.tick_params(axis='both', labelsize=17)
     ax.grid(which='both')
-    ax.set_ylim((-0.05, 1.1))
+    ax.set_ylim((-0.05, 1.2))
     legend_in_box = False # maybe later add as argument
     if legend_in_box: leg = ax.legend(fontsize=17)
     else: 

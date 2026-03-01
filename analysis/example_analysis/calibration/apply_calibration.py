@@ -262,7 +262,8 @@ if __name__=='__main__':
         if dtype != 'sim': continue
         for process_key in events_combined[dtype].keys():
             this_events = events_combined[dtype][process_key]
-            scores = this_events['Jets_score_isB']
+            score_name = 'score_isB'
+            scores = this_events['Jets_' + score_name]
             scores_counts = ak.num(scores)
             scores_flat = ak.flatten(scores)
             geneventtype = this_events['genEventType']
@@ -270,8 +271,8 @@ if __name__=='__main__':
             for key, val in calibration.items():
                 #if key not in ['light', 'c']: continue # for testing
                 # get bins and values
-                bins = np.array(val['score_isB']['bins'])
-                values = np.array(val['score_isB']['values'])
+                bins = np.array(val[score_name]['bins'])
+                values = np.array(val[score_name]['values'])
                 # get per-jet values and aggregate to per-event values
                 bin_ids = np.digitize(scores_flat, bins, right=True) - 1
                 calibration_values_flat = values[bin_ids]

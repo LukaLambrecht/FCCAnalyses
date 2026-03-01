@@ -542,6 +542,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
             if variable.variable.startswith('Jets_'): yaxtitle = 'Jets'
             if variable.variable.startswith('JetsConstituents_'): yaxtitle = 'Jet constituents'
             if variable.variable.startswith('SecondaryVertices_'): yaxtitle = 'Vertices'
+            if variable.variable.startswith('V0Candidates_'): yaxtitle = 'V0 candidates'
             include_binwidth = True # maybe later add as argument
             if include_binwidth:
                 if variable.unit is not None and len(variable.unit)>0:

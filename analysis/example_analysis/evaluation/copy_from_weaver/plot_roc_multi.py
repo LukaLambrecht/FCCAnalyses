@@ -205,12 +205,10 @@ def plot_roc_multi(events,
 
     # initialize colors (ad hoc, hard-coded)
     cmap = {}
-    cmap[('b', 'c')] = 'darkorchid'
+    cmap[('b', 'c')] = 'blueviolet'
     cmap[('b', 'uds')] = 'crimson'
     cmap[('b', 'udsc')] = 'mediumvioletred'
     cmap[('c', 'uds')] = 'dodgerblue'
-    #cmap[('s', 'udcb')] = 
-    cmap[('s', 'ud')] = 'forestgreen'
 
     # initialize a table
     table = {}
