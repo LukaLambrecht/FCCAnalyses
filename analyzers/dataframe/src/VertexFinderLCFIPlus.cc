@@ -245,8 +245,8 @@ ROOT::VecOps::RVec<int> VertexSeed_best(ROOT::VecOps::RVec<edm4hep::TrackState> 
       // - more or less same direction
       if( p_i.DeltaR(p_j) > 0.8 ) continue;
  
-      // V0 rejection (loose)
-      ROOT::VecOps::RVec<bool> isInV0 = isV0(tr_pair, PV, false);
+      // V0 rejection (tight)
+      ROOT::VecOps::RVec<bool> isInV0 = isV0(tr_pair, PV, true);
       if(isInV0[0] && isInV0[1]) continue;
       
       // fit a common vertex (fast method) and do basic checks
@@ -473,8 +473,8 @@ ROOT::VecOps::RVec<bool> isV0(
   ROOT::VecOps::RVec<double> isLambda0 = constraints_Lambda0(tight);
   ROOT::VecOps::RVec<double> isGamma = constraints_Gamma(tight);
   
+  // make a dummy track pair
   ROOT::VecOps::RVec<edm4hep::TrackState> t_pair;
-  // push empty tracks to make a size=2 vector
   edm4hep::TrackState tr_i, tr_j;
   t_pair.push_back(tr_i);
   t_pair.push_back(tr_j);
@@ -482,11 +482,15 @@ ROOT::VecOps::RVec<bool> isV0(
 
   // loop over pairs of tracks
   for(unsigned int i=0; i<nTr-1; i++) {
-    if(result[i] == true) continue; // do not consider tracks that are already paired in a V0 candidate
+    // do not consider tracks that are already paired in a V0 candidate.
+    // update: disable this skip to be maximally inclusive in V0 reconstruction.
+    //if(result[i] == true) continue;
     t_pair[0] = np_tracks[i];
     TVector3 p_i( TMath::Cos(np_tracks[i].phi), TMath::Sin(np_tracks[i].phi), np_tracks[i].tanLambda );
     for(unsigned int j=i+1; j<nTr; j++) {
-      if(result[j] == true) continue; // do not consider tracks that are already paired in a V0 candidate
+      // do not consider tracks that are already paired in a V0 candidate.
+      // update: disable this skip to be maximally inclusive in V0 reconstruction.
+      //if(result[j] == true) continue;
       t_pair[1] = np_tracks[j];
       TVector3 p_j( TMath::Cos(np_tracks[j].phi), TMath::Sin(np_tracks[j].phi), np_tracks[j].tanLambda );
 
@@ -505,26 +509,22 @@ ROOT::VecOps::RVec<bool> isV0(
       if(V0_cand[0]>isKs[0] && V0_cand[0]<isKs[1] && V0_cand[4]>isKs[2] && V0_cand[5]>isKs[3]) {
 	    result[i] = true;
 	    result[j] = true;
-	    break;
       }
 
       // Lambda0
-      else if(V0_cand[1]>isLambda0[0] && V0_cand[1]<isLambda0[1] && V0_cand[4]>isLambda0[2] && V0_cand[5]>isLambda0[3]) {
+      if(V0_cand[1]>isLambda0[0] && V0_cand[1]<isLambda0[1] && V0_cand[4]>isLambda0[2] && V0_cand[5]>isLambda0[3]) {
 	    result[i] = true;
 	    result[j] = true;
-	    break;
       }
-      else if(V0_cand[2]>isLambda0[0] && V0_cand[2]<isLambda0[1] && V0_cand[4]>isLambda0[2] && V0_cand[5]>isLambda0[3]) {
+      if(V0_cand[2]>isLambda0[0] && V0_cand[2]<isLambda0[1] && V0_cand[4]>isLambda0[2] && V0_cand[5]>isLambda0[3]) {
 	    result[i] = true;
 	    result[j] = true;
-	    break;
       }
 
       // photon conversion
-      else if(V0_cand[3]<isGamma[1] && V0_cand[4]>isGamma[2] && V0_cand[5]>isGamma[3]) {
+      if(V0_cand[3]<isGamma[1] && V0_cand[4]>isGamma[2] && V0_cand[5]>isGamma[3]) {
 	    result[i] = true;
 	    result[j] = true;
-	    break;
       }	  
     }
   }
@@ -569,11 +569,15 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
   
   // loop over pairs of tracks
   for(unsigned int i=0; i<nTr-1; i++) {
-    if(isInV0[i] == true) continue; // do not consider tracks that are already paired in a V0 candidate
+    // do not consider tracks that are already paired in a V0 candidate.
+    // update: disable this skip to be maximally inclusive in V0 reconstruction.
+    //if(isInV0[i] == true) continue;
     tr_pair[0] = tracks[i];
     TVector3 p_i( TMath::Cos(tracks[i].phi), TMath::Sin(tracks[i].phi), tracks[i].tanLambda );
     for(unsigned int j=i+1; j<nTr; j++) {
-      if(isInV0[j] == true) continue; // do not consider tracks that are already paired in a V0 candidate
+      // do not consider tracks that are already paired in a V0 candidate.
+      // update: disable this skip to be maximally inclusive in V0 reconstruction.
+      //if(isInV0[j] == true) continue;
       tr_pair[1] = tracks[j];
       TVector3 p_j( TMath::Cos(tracks[j].phi), TMath::Sin(tracks[j].phi), tracks[j].tanLambda );
 
@@ -599,7 +603,6 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
 	    vtx.push_back(V0_vtx);
 	    pdgAbs.push_back(310);
 	    invM.push_back(V0_cand[0]);
-	    //break;
       }
       
       // Lambda0
@@ -610,7 +613,6 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
 	    vtx.push_back(V0_vtx);
 	    pdgAbs.push_back(3122);
 	    invM.push_back(V0_cand[1]);
-	    //break;
       }
       if(V0_cand[2]>constraints_lambda0[0] && V0_cand[2]<constraints_lambda0[1] && V0_cand[4]>constraints_lambda0[2] && V0_cand[5]>constraints_lambda0[3]) {
 	    if(debug_me) std::cout<<"Found a Lambda0"<<std::endl;
@@ -619,7 +621,6 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
 	    vtx.push_back(V0_vtx);
 	    pdgAbs.push_back(3122);
 	    invM.push_back(V0_cand[2]);
-	    //break;
       }
 	
       // photon conversion
@@ -630,7 +631,6 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
 	    vtx.push_back(V0_vtx);
 	    pdgAbs.push_back(22);
 	    invM.push_back(V0_cand[3]);
-	    //break;
       }
     }
   } // end of loop over track pairs
@@ -894,7 +894,7 @@ ROOT::VecOps::RVec<double> constraints_Ks(bool tight) {
     result[0] = 0.1; // widended to include sideband; originally 0.488;
     result[1] = 1.4; // widened to include sideband; originally 0.508;
     result[2] = 0.1; // originally 0.3 [mm]
-    result[3] = 0.999;
+    result[3] = 0.0; // widened based on observed values in ALEPH; originally 0.999;
   }
   
   return result;
@@ -915,7 +915,7 @@ ROOT::VecOps::RVec<double> constraints_Lambda0(bool tight) {
     result[0] = 0.1; // widened to include sideband; originally 1.106;
     result[1] = 1.4; // widened to include sideband; originally 1.126;
     result[2] = 0.1; // originally 0.3 [mm]
-    result[3] = 0.999;
+    result[3] = 0.0; // widened based on observed values in ALEPH; originally 0.999;
   }
 
   return result;
