@@ -145,9 +145,6 @@ if __name__=='__main__':
             variablelist.append(variable.variable)
     variablelist = sum([get_variable_names(v) for v in variablelist], [])
     variablelist = list(set(variablelist))
-    if len(variables) != 1:
-        raise Exception(f'Expected 1 variable, but found {len(variables)}')
-    variable = variables[0]
 
     # get luminosity from year
     luminosity = args.luminosity
@@ -202,90 +199,86 @@ if __name__=='__main__':
             msg = f'Found unexpected number of data categories: {keys}'
             raise Exception(msg)
 
-    # extract histograms of interest
-    hists = hists_combined['sim']
-    if len(hists.keys()) != 1:
-        raise Exception(f'Unexpected number of regions and/or variables: {hists.keys()}')
-    hists = list(hists.values())[0]
-    categories = list(hists.keys())
+    # loop over regions/variables
+    hists_sim = hists_combined['sim']
+    for region_variable_key, hists in hists_sim.items():
+        print(f'Now running on {region_variable_key}...')
+        categories = list(hists.keys())
 
-    # determine thresholds
-    # (hard-coded for now, maybe dynamic later)
-    #thresholds = np.linspace(0, 1, num=101)
-    # alternative: just use the binning defined in the variable
-    thresholds = variable.bins
+        # determine thresholds
+        thresholds = variable.bins
 
-    # loop over thresholds
-    table = []
-    for threshold_idx in range(len(thresholds)-1):
-        threshold_low = thresholds[threshold_idx]
-        threshold_high = thresholds[threshold_idx+1]
+        # loop over thresholds
+        table = []
+        for threshold_idx in range(len(thresholds)-1):
+            threshold_low = thresholds[threshold_idx]
+            threshold_high = thresholds[threshold_idx+1]
         
-        # determine correct bin in histogram
-        bins_edges = variable.bins
-        bin_edge_idx_low = np.searchsorted(bins_edges, threshold_low)
-        # (note: this gives the first bin edge large than or equal to threshold_low,
-        #  so should start at bin edge idx_low, i.e. bin idx_low)
-        bin_edge_idx_high = np.searchsorted(bins_edges, threshold_high)
-        # (note: this gives the first bin edge larger than or equal to threshold_high,
-        #  so should go to (including) bin edge idx_high, i.e. bin idx_high-1)
+            # determine correct bin in histogram
+            bins_edges = variable.bins
+            bin_edge_idx_low = np.searchsorted(bins_edges, threshold_low)
+            # (note: this gives the first bin edge large than or equal to threshold_low,
+            #  so should start at bin edge idx_low, i.e. bin idx_low)
+            bin_edge_idx_high = np.searchsorted(bins_edges, threshold_high)
+            # (note: this gives the first bin edge larger than or equal to threshold_high,
+            #  so should go to (including) bin edge idx_high, i.e. bin idx_high-1)
 
-        # loop over histograms and sum appropriate bins
-        nevents = {}
-        for key, hist in hists.items():
-            hist = hist['nominal']
-            this_nevents = np.sum(hist[0][bin_edge_idx_low:bin_edge_idx_high])
-            nevents[key] = this_nevents
+            # loop over histograms and sum appropriate bins
+            nevents = {}
+            for key, hist in hists.items():
+                hist = hist['nominal']
+                this_nevents = np.sum(hist[0][bin_edge_idx_low:bin_edge_idx_high])
+                nevents[key] = this_nevents
 
-        # make ratio
-        purity = {}
-        sum_nevents = sum(nevents.values())
-        for key, val in nevents.items(): purity[key] = nevents[key] / sum_nevents
+            # make ratio
+            purity = {}
+            sum_nevents = sum(nevents.values())
+            for key, val in nevents.items(): purity[key] = nevents[key] / sum_nevents
         
-        # store info in table
-        row = {
-            'idx': threshold_idx,
-            'threshold_low': threshold_low,
-            'threshold_high': threshold_high
-        }
-        for key, val in purity.items(): row[f'purity_{key}'] = val
-        table.append(row)
+            # store info in table
+            row = {
+                'idx': threshold_idx,
+                'threshold_low': threshold_low,
+                'threshold_high': threshold_high
+            }
+            for key, val in purity.items(): row[f'purity_{key}'] = val
+            table.append(row)
 
-        # printouts for testing
-        doprint = False
-        if doprint:
-            print(f'Lower threshold: {threshold_low}')
-            print(f'Upper threshold: {threshold_high}')
-            print(f'Lower bin: {bin_edge_idx_low} ({bins_edges[bin_edge_idx_low]} - {bins_edges[bin_edge_idx_low+1]})')
-            print(f'Upper bin: {bin_edge_idx_high} ({bins_edges[bin_edge_idx_high-1]} - {bins_edges[bin_edge_idx_high]})')
-            print(f'Purities:')
-            for key, val in purity.items(): print(f' - {key}: {val}')
-            print('-----')
+            # printouts for testing
+            doprint = False
+            if doprint:
+                print(f'Lower threshold: {threshold_low}')
+                print(f'Upper threshold: {threshold_high}')
+                print(f'Lower bin: {bin_edge_idx_low} ({bins_edges[bin_edge_idx_low]} - {bins_edges[bin_edge_idx_low+1]})')
+                print(f'Upper bin: {bin_edge_idx_high} ({bins_edges[bin_edge_idx_high-1]} - {bins_edges[bin_edge_idx_high]})')
+                print(f'Purities:')
+                for key, val in purity.items(): print(f' - {key}: {val}')
+                print('-----')
 
-    # make dataframe
-    table = pd.DataFrame.from_records(table)
-    print(table)
+        # make dataframe
+        table = pd.DataFrame.from_records(table)
+        print(table)
 
-    # make output directory
-    if not os.path.exists(args.outputdir): os.makedirs(args.outputdir)
+        # make output directory
+        if not os.path.exists(args.outputdir): os.makedirs(args.outputdir)
 
-    # store table
-    table.to_csv(os.path.join(args.outputdir, 'purity.csv'))
+        # store table
+        table.to_csv(os.path.join(args.outputdir, f'purity_{region_variable_key}.csv'))
 
-    # make a figure
-    fig, ax = plt.subplots()
-    for category in categories:
-        values = table[f'purity_{category}'].values
-        ax.stairs(values, edges=thresholds, label=category, linewidth=2)
+        # make a figure
+        fig, ax = plt.subplots()
+        for category in categories:
+            values = table[f'purity_{category}'].values
+            ax.stairs(values, edges=thresholds, label=category, linewidth=2)
 
-    # plot aesthetics
-    ax.grid(which='both', axis='both')
-    ax.set_xlabel('Score bin', fontsize=12)
-    ax.set_ylabel('Purity', fontsize=12)
-    ax.legend()
+        # plot aesthetics
+        ax.grid(which='both', axis='both')
+        ax.set_xlabel(f'Score bin ({region_variable_key})', fontsize=12)
+        ax.set_ylabel('Purity', fontsize=12)
+        ax.legend()
 
-    # save figure
-    fig.tight_layout()
-    outputfile = os.path.join(args.outputdir, 'purity.png')
-    fig.savefig(outputfile)
-    plt.close()
+        # save figure
+        fig.tight_layout()
+        outputfile = os.path.join(args.outputdir, f'purity_{region_variable_key}.png')
+        fig.savefig(outputfile)
+        plt.close()
