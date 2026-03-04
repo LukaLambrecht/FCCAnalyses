@@ -22,11 +22,11 @@ if __name__=='__main__':
     treename = 'events'
     outputdir = 'output_plots'
     isdata = ('output_data' in inputfiles[0]) # to make more robust
-    doscatter = False
-    pbins = [0, 0.5, 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30]
-    #pbins = []
-    #categories_to_plot = ['kaon', 'pion', 'electron', 'muon', 'proton']
-    categories_to_plot = ['kaon', 'pion']
+    doscatter = True
+    #pbins = [0, 0.5, 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30]
+    pbins = []
+    categories_to_plot = ['kaon', 'pion', 'electron', 'muon', 'proton']
+    #categories_to_plot = ['kaon', 'pion']
 
     variables = [
       'JetsConstituents_pt',
@@ -183,7 +183,7 @@ if __name__=='__main__':
 
             # plot aesthetics
             ax.set_ylabel('dE/dx (normalized to MIPs)', fontsize=17)
-            ax.set_xlabel('Particle momentum [Gev]', fontsize=17)
+            ax.set_xlabel('Particle momentum [GeV]', fontsize=17)
             ax.grid(which='both', axis='both')
             leg = ax.legend(fontsize=17, loc='upper right')
             for lh in leg.legend_handles:
@@ -280,7 +280,7 @@ if __name__=='__main__':
             ax.set_xlabel('dE/dx (normalized to MIPs)', fontsize=17)
             ax.grid(which='both', axis='both')
             ax.legend(fontsize=17)
-            text = ax.text(0.05, 0.95, f'{plow} $<$ p $<$ {phigh} [Gev]', va='top',
+            text = ax.text(0.05, 0.95, f'{plow} $<$ p $<$ {phigh} [GeV]', va='top',
                             transform=ax.transAxes, fontsize=17,
                             bbox={'facecolor': 'white', 'alpha': 0.5})
             ax.tick_params(labelsize=17)

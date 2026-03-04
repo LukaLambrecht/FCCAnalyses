@@ -42,7 +42,7 @@ if __name__=='__main__':
         'c': {
             'label_branch': 'recojet_isC',
             'score_branch': 'score_recojet_isC',
-            'label': r'$ud$-jets'
+            'label': r'$c$-jets'
         },
         'ud': {
             'label_branch': 'recojet_isUDG',
