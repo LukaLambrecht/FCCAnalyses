@@ -41,6 +41,31 @@ ROOT::VecOps::RVec<int> makeTrackToMCMapping(
     return trackToMCMap;
 }
 
+// Same as above, but the other way round
+ROOT::VecOps::RVec<int> makeMCToTrackMapping(
+        const ROOT::VecOps::RVec<edm4hep::MCParticleData>& genParticles,
+        const ROOT::VecOps::RVec<podio::ObjectID>& tracktomc_links,
+        const ROOT::VecOps::RVec<podio::ObjectID>& mctotrack_links){
+
+    // initialize
+    ROOT::VecOps::RVec<int> MCToTrackMap;
+    for(int idx = 0; idx < genParticles.size(); idx++){ MCToTrackMap.push_back(9999); }
+
+    // check
+    if( tracktomc_links.size() != mctotrack_links.size() ){
+        std::string msg = "These vectors should have the same size";
+        throw std::runtime_error(msg);
+    }
+
+    // loop over index pairs
+    for(int idx = 0; idx < tracktomc_links.size(); idx++){
+        int track_idx = mctotrack_links.at(idx).index;
+        int mc_idx = tracktomc_links.at(idx).index;
+        MCToTrackMap.at(mc_idx) = track_idx;
+    }
+    return MCToTrackMap;
+}
+
 // Get MC particle index for each reconstructed particle
 // Note: for ALEPH data, there exists a direct link between tracks and MC particles
 //       but neutral reco particles do not seem to have something like that,

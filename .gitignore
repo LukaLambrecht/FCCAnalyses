@@ -4,6 +4,7 @@ analysis/makentuples
 # custom condor and slurm log files
 **cjob_*
 **sjob_*
+**llambrec.cc
 
 # custom output folders
 **output_*
