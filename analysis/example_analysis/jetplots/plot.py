@@ -444,7 +444,17 @@ if __name__=='__main__':
             # data ratio pad
             #if datatag is not None: axs[1].set_ylim((0, 2))
 
-            # save the fige
+            # dirty hard-coded ad-hoc hack for one particular figure...
+            dov0mass = True
+            if dov0mass and variable.variable=='v0cand_mass':
+                axs[0].axvline(x=0.498, linestyle='--', color='red')
+                kstext = r'$K^0_S$ (498 MeV)'
+                axs[0].text(0.47, 0.95*axs[0].get_ylim()[1], kstext, ha='right', va='top', fontsize=17, color='red')
+                axs[0].axvline(x=1.116, linestyle='--', color='red')
+                latext = r'$\Lambda^0$ (1.116 GeV)'
+                axs[0].text(1.08, 0.95*axs[0].get_ylim()[1], latext, ha='right', va='top', fontsize=17, color='red')
+
+            # save the figure
             fig.tight_layout()
             figname = region_name + '_' + variable.name + '.png'
             figname = os.path.join(args.outputdir, figname)

@@ -542,7 +542,7 @@ def plot_hists_default(hists_combined, variables, outputdir,
             if variable.variable.startswith('Jets_'): yaxtitle = 'Jets'
             if variable.variable.startswith('JetsConstituents_'): yaxtitle = 'Jet constituents'
             if variable.variable.startswith('SecondaryVertices_'): yaxtitle = 'Vertices'
-            if variable.variable.startswith('V0Candidates_'): yaxtitle = 'V0 candidates'
+            if variable.variable.startswith('V0Candidates_'): yaxtitle = '$V^0$ candidates'
             include_binwidth = True # maybe later add as argument
             if include_binwidth:
                 if variable.unit is not None and len(variable.unit)>0:
@@ -599,6 +599,16 @@ def plot_hists_default(hists_combined, variables, outputdir,
             # data ratio pad
             #if datatag is not None: axs[1].set_ylim((0, 2))
 
+            # dirty hard-coded ad-hoc hack for one particular figure...
+            dov0mass = True
+            if dov0mass and variable.variable=='V0Candidates_mass':
+                axs[0].axvline(x=0.498, linestyle='--', color='red')
+                kstext = r'$K^0_S$ (498 MeV)'
+                axs[0].text(0.47, 0.95*axs[0].get_ylim()[1], kstext, ha='right', va='top', fontsize=17, color='red')
+                axs[0].axvline(x=1.116, linestyle='--', color='red')
+                latext = r'$\Lambda^0$ (1.116 GeV)'
+                axs[0].text(1.08, 0.95*axs[0].get_ylim()[1], latext, ha='right', va='top', fontsize=17, color='red')
+
             # save the figure
             fig.tight_layout()
             figname = region_name + '_' + variable.name + '.png'
@@ -652,6 +662,25 @@ def plot_hists_default(hists_combined, variables, outputdir,
                       transform=axs[0].transAxes)
                 # data ratio pad
                 #if datatag is not None: axs[1].set_ylim((0, 2))
+
+                # dirty hard-coded ad-hoc hack for one particular figure...
+                dov0dxy = True
+                if dov0mass and variable.variable=='V0Candidates_dxy':
+                    '''axs[0].axvline(x=6.5, linestyle='--', color='red')
+                    txt = axs[0].text(8, axs[0].get_ylim()[1]**0.95, 'VDET layer 1', va='top', fontsize=17, color='red')
+                    txt.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='white'))
+                    axs[0].axvline(x=11.3, linestyle='--', color='red')
+                    txt = axs[0].text(12.8, axs[0].get_ylim()[1]**0.9, 'VDET layer 2', va='top', fontsize=17, color='red')
+                    txt.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='white'))
+                    axs[0].axvline(x=16, linestyle='--', color='red')
+                    txt = axs[0].text(17.5, axs[0].get_ylim()[1]**0.85, 'ITC inner radius', va='top', fontsize=17, color='red')
+                    txt.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='white'))
+                    axs[0].axvline(x=26, linestyle='--', color='red')
+                    txt = axs[0].text(27.5, axs[0].get_ylim()[1]**0.8, 'ITC outer radius', va='top', fontsize=17, color='red')
+                    txt.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='white'))'''
+                    #axs[0].axvline(x=30, linestyle='--', color='red')
+                    #txt = axs[0].text(31.5, axs[0].get_ylim()[1]**0.75, 'TPC inner radius', va='top', fontsize=17, color='red')
+                    #txt.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='white'))
 
                 # save the figure
                 fig.tight_layout()

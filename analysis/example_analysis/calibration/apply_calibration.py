@@ -32,6 +32,7 @@ if __name__=='__main__':
     parser.add_argument('-s', '--sim', required=True, nargs='+')
     parser.add_argument('-d', '--data', default=None, nargs='+')
     parser.add_argument('-c', '--calibration', default=None)
+    parser.add_argument('-b', '--calibration_branch', default=None)
     parser.add_argument('-v', '--variables', required=True, nargs='+')
     parser.add_argument('-o', '--outputdir', required=True)
     parser.add_argument('--objectselection', default=None)
@@ -253,17 +254,22 @@ if __name__=='__main__':
                               splitdict = splitdict,
                               weights = weights)
 
+    # if no calibration requested, stop here
+    if args.calibration is None: sys.exit()
+
     # load calibration
     with open(args.calibration, 'r') as f:
         calibration = json.load(f)
+    if args.calibration_branch is None:
+        raise Exception('Must provide a calibration branch name.')
 
     # apply calibration
     for dtype in events_combined.keys():
         if dtype != 'sim': continue
         for process_key in events_combined[dtype].keys():
             this_events = events_combined[dtype][process_key]
-            score_name = 'score_isB'
-            scores = this_events['Jets_' + score_name]
+            score_name = args.calibration_branch.replace('Jets_', '')
+            scores = this_events[args.calibration_branch]
             scores_counts = ak.num(scores)
             scores_flat = ak.flatten(scores)
             geneventtype = this_events['genEventType']
