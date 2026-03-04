@@ -501,8 +501,9 @@ ROOT::VecOps::RVec<bool> isV0(
       //if( p_i.DeltaR(p_j) > 0.4 ) continue;
 
       // fit common vertex
-      double chi2max = 10.;
-      ROOT::VecOps::RVec<double> V0_cand = get_V0candidate(V0, t_pair, PV, true, chi2max);
+      double chi2_cut = 10.;
+      bool do_chi2_cut = (chi2_cut > 0) ? true : false;
+      ROOT::VecOps::RVec<double> V0_cand = get_V0candidate(V0, t_pair, PV, do_chi2_cut, chi2_cut);
       if( V0_cand[0] < 0 ){ continue; }
 
       // Ks
@@ -588,7 +589,8 @@ VertexingUtils::FCCAnalysesV0 get_V0s(
       //if( p_i.DeltaR(p_j) > 0.4 ) continue;
 
       // try to make a V0 candidate
-      ROOT::VecOps::RVec<double> V0_cand = get_V0candidate(V0_vtx, tr_pair, PV, true, chi2_cut);
+      bool do_chi2_cut = (chi2_cut > 0) ? true : false;
+      ROOT::VecOps::RVec<double> V0_cand = get_V0candidate(V0_vtx, tr_pair, PV, do_chi2_cut, chi2_cut);
       if(V0_cand[0] == -1) continue;
 
       // decide which one it is
