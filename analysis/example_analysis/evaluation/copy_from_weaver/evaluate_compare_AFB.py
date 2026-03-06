@@ -78,5 +78,6 @@ if __name__=='__main__':
             signal_categories,
             background_categories,
             outputdir = outputdir,
-            doAFB = True)
+            doAFB = True,
+            do_bootstrap = True)
         plt.close()

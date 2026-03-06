@@ -11,9 +11,12 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score
 
 
-def format_table_txt(table):
-    header = '{0: <30}'.format('Signal efficiency:')
-    for sig_eff in table['sig_effs']: header += '{0: <15}'.format(sig_eff)
+def format_table_txt(table, colwidth=15, firstcolwidth=30):
+    colfmtstr = '{0: <' + str(colwidth) + '}'
+    firstcolfmtstr = '{0: <' + str(firstcolwidth) + '}'
+
+    header = firstcolfmtstr.format('Signal efficiency:')
+    for sig_eff in table['sig_effs']: header += colfmtstr.format(sig_eff)
     length = len(header)
     divider = '-'*length
     lines = []
@@ -21,12 +24,44 @@ def format_table_txt(table):
     for key, val in table.items():
         if key=='sig_effs': continue
         label = key.replace('$', '').replace('\\', '')
-        line = '{0: <30}'.format(label)
+        line = firstcolfmtstr.format(label)
         for el in val:
             elstr = str(el)
             if el > 0.01: elstr = '{:.3f}'.format(el)
             else: elstr = '{:.3e}'.format(el)
-            line += '{0: <15}'.format(elstr)
+            line += colfmtstr.format(elstr)
+        lines.append(line)
+    lines.append(divider)
+    txt = '\n'.join([header] + lines)
+    return txt
+
+def format_table_txt_latex(table, colwidth=30, firstcolwidth=30):
+    colfmtstr = '{0: <' + str(colwidth) + '}'
+    firstcolfmtstr = '{0: <' + str(firstcolwidth) + '}'
+
+    header = firstcolfmtstr.format('Signal efficiency:')
+    for sig_eff in table['sig_effs']: header += colfmtstr.format(sig_eff)
+    length = len(header)
+    divider = '-'*length
+    lines = []
+    lines.append(divider)
+    for key, val in table.items():
+        if key=='sig_effs': continue
+        label = key.replace('-', ' ')
+        label = label.replace('$b$', r'\PQb')
+        label = label.replace('$c$', r'\PQc')
+        label = label.replace('$s$', r'\PQs')
+        label = label.replace('$ud$', r'$\PQu\PQd$')
+        label = label.replace('$uds$', r'$\PQu\PQd\PQs$')
+        line = firstcolfmtstr.format(label + ' &')
+        for el in val:
+            elstr = str(el)
+            if el > 0.01: elstr = '{:.2g}'.format(el)
+            else:
+                elstr = '{:.1e}'.format(el)
+                elstr = '$ ' + elstr.replace('e-0', 'e-').replace('e', r'\times 10^{') + '} $'
+            line += colfmtstr.format(elstr + ' &')
+        line = line.strip(' &') + r' \\'
         lines.append(line)
     lines.append(divider)
     txt = '\n'.join([header] + lines)
@@ -105,7 +140,8 @@ def plot_scores_multi(events,
 
 def make_roc_curves(events,
             signal_categories,
-            background_categories):
+            background_categories,
+            do_bootstrap = False):
 
     # check arguments
     all_categories = {**signal_categories, **background_categories}
@@ -162,19 +198,45 @@ def make_roc_curves(events,
                     np.linspace(np.amax(this_scores)*0.9, np.amax(this_scores)*0.98, num=300),
                     np.linspace(np.amax(this_scores)*0.98, np.amax(this_scores), num=300)
                 ))
-                efficiency_sig = np.zeros(len(thresholds))
-                efficiency_bkg = np.zeros(len(thresholds))
-                for idx, threshold in enumerate(thresholds):
-                    eff_s = np.sum(weights_sig[scores_sig > threshold])
-                    efficiency_sig[idx] = eff_s
-                    eff_b = np.sum(weights_bkg[scores_bkg > threshold])
-                    efficiency_bkg[idx] = eff_b
-                efficiency_sig /= np.sum(weights_sig)
-                efficiency_bkg /= np.sum(weights_bkg)
+
+                def roc_curve(scores, weights, labels, thresholds):
+                    scores_sig = scores[labels==1]
+                    scores_bkg = scores[labels==0]
+                    weights_sig = weights[labels==1]
+                    weights_bkg = weights[labels==0]
+                    efficiency_sig = np.zeros(len(thresholds))
+                    efficiency_bkg = np.zeros(len(thresholds))
+                    for idx, threshold in enumerate(thresholds):
+                        eff_s = np.sum(weights_sig[scores_sig > threshold])
+                        efficiency_sig[idx] = eff_s
+                        eff_b = np.sum(weights_bkg[scores_bkg > threshold])
+                        efficiency_bkg[idx] = eff_b
+                    efficiency_sig /= np.sum(weights_sig)
+                    efficiency_bkg /= np.sum(weights_bkg)
+                    return (efficiency_sig, efficiency_bkg)
+
+                # make roc curve
+                efficiency_sig, efficiency_bkg = roc_curve(this_scores, this_weights, this_labels, thresholds)
+
+                # new: add uncertainty from bootstrapping
+                eff_s_lo = None
+                eff_s_hi = None
+                if do_bootstrap:
+                    n_bootstrap = 100
+                    effs_s = []
+                    for _ in range(n_bootstrap):
+                        idx = np.random.randint(0, len(this_scores), len(this_scores))
+                        eff_s, eff_b = roc_curve(this_scores[idx], this_weights[idx], this_labels[idx], thresholds)
+                        this_eff_s = np.interp(efficiency_bkg[::-1], eff_b[::-1], eff_s[::-1])
+                        effs_s.append(this_eff_s[::-1])
+                    effs_s = np.array(effs_s)
+                    eff_s_med = np.median(effs_s, axis=0)
+                    eff_s_lo = np.percentile(effs_s, 16, axis=0)
+                    eff_s_hi = np.percentile(effs_s, 84, axis=0)
 
                 # add to dict
                 key = (signal_category_name, background_category_name)
-                val = (efficiency_sig, efficiency_bkg)
+                val = (efficiency_sig, efficiency_bkg, eff_s_lo, eff_s_hi)
                 roc_curves[key] = val
                 aucs[key] = auc
 
@@ -186,7 +248,8 @@ def plot_roc_multi(events,
             background_categories,
             outputdir = None,
             doRb = False,
-            doAFB = False):
+            doAFB = False,
+            do_bootstrap = False):
 
     # check arguments
     all_categories = {**signal_categories, **background_categories}
@@ -215,7 +278,7 @@ def plot_roc_multi(events,
     table['sig_effs'] = [0.2, 0.4, 0.6, 0.8]
 
     # make roc curves
-    roc_curves, aucs = make_roc_curves(events, signal_categories, background_categories)
+    roc_curves, aucs = make_roc_curves(events, signal_categories, background_categories, do_bootstrap=do_bootstrap)
 
     # loop over pairs of categories
     # update: loop over all pairs, not just signal vs background
@@ -225,7 +288,7 @@ def plot_roc_multi(events,
                
                 # get roc curve 
                 key = (signal_category_name, background_category_name)
-                efficiency_sig, efficiency_bkg = roc_curves[key]
+                efficiency_sig, efficiency_bkg, eff_s_lo, eff_s_hi = roc_curves[key]
                 auc = aucs[key]
                 
                 # make a plot of the ROC curve
@@ -237,6 +300,11 @@ def plot_roc_multi(events,
                 ax.plot(efficiency_bkg, efficiency_sig,
                   color=color, linewidth=3, label=label)
                 cidx += 1
+
+                # experimental: add uncertainty
+                if eff_s_lo is not None and eff_s_hi is not None:
+                    ax.fill_between(efficiency_bkg, eff_s_lo, eff_s_hi,
+                        color=color, alpha=0.3)
 
                 # make a table entry
                 table_entry = []
@@ -322,6 +390,8 @@ def plot_roc_multi(events,
     print('Results table:')
     table_txt = format_table_txt(table)
     print(table_txt)
+    table_txt_latex = format_table_txt_latex(table)
+    print(table_txt_latex)
 
     # store table to json and file
     filename = os.path.join(outputdir, 'table.json')

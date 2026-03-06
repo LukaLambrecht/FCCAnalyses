@@ -11,6 +11,7 @@ sys.path.append(thisdir)
 
 from tools import read_file
 from plot_roc_multi import make_roc_curves
+from plot_roc_multi import format_table_txt, format_table_txt_latex
 
 # global pyplot settings
 plt.rc("text", usetex=True)
@@ -86,7 +87,7 @@ if __name__=='__main__':
         roc_curves.append(roc_curve)
         aucs.append(auc)
 
-    # make a plot
+    # initialize plot
     file_to_label = ['all input features', r'no $V^0$', r'no $dE/dx$']
     file_to_style = [None, '--', ':']
     key_to_color = {}
@@ -94,6 +95,12 @@ if __name__=='__main__':
     key_to_color[('s', 'c')] = 'lightseagreen'
     key_to_color[('s', 'b')] = 'deepskyblue'
     fig, ax = plt.subplots()
+
+    # initialize a table
+    table = {}
+    table['sig_effs'] = [0.2, 0.4, 0.6, 0.8]
+
+    # loop over categories
     for signal_key in signal_categories:
         for background_key in background_categories:
             for fileidx in range(len(args.inputfiles)):
@@ -102,16 +109,24 @@ if __name__=='__main__':
                 key = (signal_key, background_key)
                 signal_category_settings = signal_categories[signal_key]
                 background_category_settings = background_categories[background_key]
-                efficiency_sig, efficiency_bkg = roc_curves[fileidx][key]
+                efficiency_sig, efficiency_bkg, _, _ = roc_curves[fileidx][key]
                 auc = aucs[fileidx][key]
 
                 # make a plot of the ROC curve
                 label = signal_category_settings['label'] + ' vs. ' + background_category_settings['label']
                 label += ', ' + file_to_label[fileidx]
-                label += ' (AUC: {:.2f})'.format(auc)
+                figlabel = label + ' (AUC: {:.2f})'.format(auc)
                 color = key_to_color[key]
                 ax.plot(efficiency_bkg, efficiency_sig,
-                color=color, linewidth=3, label=label, linestyle=file_to_style[fileidx])
+                color=color, linewidth=3, label=figlabel, linestyle=file_to_style[fileidx])
+
+                # make a table entry
+                table_entry = []
+                for sig_eff in table['sig_effs']:
+                    idx = np.nonzero(efficiency_sig[::-1] > sig_eff)[0][0]
+                    bkg_eff = efficiency_bkg[::-1][idx]
+                    table_entry.append(bkg_eff)
+                table[label] = table_entry
 
     # add random guessing line
     dummy_efficiency = np.linspace(0, 1, num=101)
@@ -152,3 +167,10 @@ if __name__=='__main__':
     fig.savefig(figname, bbox_extra_artists=(leg,), bbox_inches='tight')
     fig.savefig(figname.replace('.png', '.pdf'), bbox_extra_artists=(leg,), bbox_inches='tight')
     print(f'Saved figure {figname}.')
+
+    # print table
+    print('Results table:')
+    table_txt = format_table_txt(table, firstcolwidth=45, colwidth=15)
+    print(table_txt)
+    table_txt_latex = format_table_txt_latex(table, firstcolwidth=45, colwidth=30)
+    print(table_txt_latex)
