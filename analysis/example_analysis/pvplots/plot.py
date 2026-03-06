@@ -225,11 +225,13 @@ def plot_hists(hists_combined, variables, outputdir,
                        ratio_yaxtitles=ratio_yaxtitles)
 
             # optional for checking: add fitted function
-            for process_key, fitted_function in fitted_functions.items():
-                if normalize:
-                    integral = np.sum(np.multiply(fitted_function, binwidths))
-                    fitted_function /= integral
-                axs[0].plot(bincenters, fitted_function, color='red', linestyle=':')
+            showfit = False
+            if showfit:
+                for process_key, fitted_function in fitted_functions.items():
+                    if normalize:
+                        integral = np.sum(np.multiply(fitted_function, binwidths))
+                        fitted_function /= integral
+                    axs[0].plot(bincenters, fitted_function, color='red', linestyle=':')
 
             # some more plot aesthetics
             axs[0].set_ylim((0, axs[0].get_ylim()[1]*1.4))
@@ -283,11 +285,12 @@ def plot_hists(hists_combined, variables, outputdir,
                        ratio_yaxtitles=ratio_yaxtitles)
 
                 # optional for checking: add fitted function
-                for process_key, fitted_function in fitted_functions.items():
-                    if normalize:
-                        integral = np.sum(np.multiply(fitted_function, binwidths))
-                        fitted_function /= integral
-                    axs[0].plot(bincenters, fitted_function, color='red', linestyle=':')
+                if showfit:
+                    for process_key, fitted_function in fitted_functions.items():
+                        if normalize:
+                            integral = np.sum(np.multiply(fitted_function, binwidths))
+                            fitted_function /= integral
+                        axs[0].plot(bincenters, fitted_function, color='red', linestyle=':')
 
                 # some more plot aesthetics
                 if np.any(histarray > 0):

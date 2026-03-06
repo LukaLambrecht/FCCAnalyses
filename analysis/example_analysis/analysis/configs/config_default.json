@@ -33,13 +33,23 @@
         ],
         "outputdir": "output_test/dedx"
     },
+    "dedx-nopreselection": {
+        "variables": [
+            "variables/variables_constituents_dedx.json",
+            "variables/variables_constituents_pid.json"
+        ],
+        "objectselection": [
+            "selections/selection_jets.json"
+        ],
+        "outputdir": "output_test/dedx-nopreselection"
+    },
     "v0": {
         "variables": [
             "variables/variables_v0.json"
         ],
         "objectselection": [
             "selections/selection_jets.json",
-            "selections/selection_v0cand_vertexchi2.json"
+            "selections/selection_v0cand_cospointing.json"
         ],
         "outputdir": "output_test/v0"
     },
@@ -49,7 +59,7 @@
         ],
         "objectselection": [
             "selections/selection_jets.json",
-            "selections/selection_v0cand_vertexchi2.json",
+            "selections/selection_v0cand_cospointing.json",
             "selections/selection_v0cand_ksmass.json"
         ],
         "outputdir": "output_test/ks"
@@ -60,7 +70,7 @@
         ],
         "objectselection": [
             "selections/selection_jets.json",
-            "selections/selection_v0cand_vertexchi2.json",
+            "selections/selection_v0cand_cospointing.json",
             "selections/selection_v0cand_lamass.json"
         ],
         "outputdir": "output_test/la"

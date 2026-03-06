@@ -208,11 +208,18 @@ if __name__=='__main__':
         # determine thresholds
         thresholds = variable.bins
 
+        # find total number of events per category
+        nevents_per_cat = {}
+        for key, hist in hists.items():
+            hist = hist['nominal'][0]
+            nevents_per_cat[key] = np.sum(hist)
+
         # loop over thresholds
         table = []
         for threshold_idx in range(len(thresholds)-1):
             threshold_low = thresholds[threshold_idx]
-            threshold_high = thresholds[threshold_idx+1]
+            #threshold_high = thresholds[threshold_idx+1] # use upper threshold, i.e. bin-by-bin
+            threshold_high = thresholds[-1] + 1e-6 # use inclusive range
         
             # determine correct bin in histogram
             bins_edges = variable.bins
@@ -223,17 +230,25 @@ if __name__=='__main__':
             # (note: this gives the first bin edge larger than or equal to threshold_high,
             #  so should go to (including) bin edge idx_high, i.e. bin idx_high-1)
 
-            # loop over histograms and sum appropriate bins
+            # loop over histograms and sum appropriate bins to find number of events per category
             nevents = {}
             for key, hist in hists.items():
-                hist = hist['nominal']
-                this_nevents = np.sum(hist[0][bin_edge_idx_low:bin_edge_idx_high])
+                hist = hist['nominal'][0]
+                hist = hist[bin_edge_idx_low:bin_edge_idx_high]
+                this_nevents = np.sum(hist)
                 nevents[key] = this_nevents
 
-            # make ratio
+            # make ratio to calculate purity
             purity = {}
             sum_nevents = sum(nevents.values())
-            for key, val in nevents.items(): purity[key] = nevents[key] / sum_nevents
+            for key, val in nevents.items():
+                this_purity = 0
+                if sum_nevents > 0: this_purity = nevents[key] / sum_nevents
+                purity[key] = this_purity
+
+            # make ratio to calculate efficiency
+            efficiency = {}
+            for key, val in nevents.items(): efficiency[key] = nevents[key] / nevents_per_cat[key]
         
             # store info in table
             row = {
@@ -242,6 +257,7 @@ if __name__=='__main__':
                 'threshold_high': threshold_high
             }
             for key, val in purity.items(): row[f'purity_{key}'] = val
+            for key, val in efficiency.items(): row[f'efficiency_{key}'] = val
             table.append(row)
 
             # printouts for testing
@@ -253,6 +269,8 @@ if __name__=='__main__':
                 print(f'Upper bin: {bin_edge_idx_high} ({bins_edges[bin_edge_idx_high-1]} - {bins_edges[bin_edge_idx_high]})')
                 print(f'Purities:')
                 for key, val in purity.items(): print(f' - {key}: {val}')
+                print(f'Efficiencies:')
+                for key, val in efficiency.items(): print(f' - {key}: {val}')
                 print('-----')
 
         # make dataframe
