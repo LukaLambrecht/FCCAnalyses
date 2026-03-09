@@ -14,7 +14,7 @@ import tools.slurmtools as st
 if __name__=='__main__':
 
     # settings
-    modeltag = '20260228_withks_withdedx_masked'
+    modeltag = '20260305_withnewks_withdedx_masked_standardized'
     ntupletag = 'withnewks'
     model = os.path.abspath(f'models/output_{modeltag}/model.onnx')
     preprocess = model.replace('model.onnx', 'preprocess.json')
