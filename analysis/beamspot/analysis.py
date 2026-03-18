@@ -22,7 +22,7 @@ ROOT.gInterpreter.Declare("""
         if( tracksToUse.size() < 2 ){ return TLorentzVector(0, 0, 0, 0); }
         ROOT::VecOps::RVec<edm4hep::TrackState> primaryTracks;
         primaryTracks = FCCAnalyses::VertexFitterSimple::get_PrimaryTracks(tracksToUse,
-            false, 0, 0, 0, 0, 0, 0);
+            25., false, 0, 0, 0, 0, 0, 0);
         if( primaryTracks.size() < 2 ){ return TLorentzVector(0, 0, 0, 0); }
         FCCAnalyses::VertexingUtils::FCCAnalysesVertex fitresult;
         fitresult = FCCAnalyses::VertexFitterSimple::VertexFitter_Tk(1, primaryTracks,
