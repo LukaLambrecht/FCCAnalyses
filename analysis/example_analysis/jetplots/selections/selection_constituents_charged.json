@@ -1,6 +1,0 @@
-{
-  "selection": [
-    "np.abs(pfcand_charge) > 0"
-  ],
-  "application": ["pfcand_*"]
-}
