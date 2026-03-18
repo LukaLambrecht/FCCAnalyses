@@ -57,7 +57,7 @@ class RDFanalysis():
 
                 .Alias("EFlowTrack", "Tracks")
                 # (must be an object of type ROOT::VecOps::RVec<edm4hep::TrackData>)
-                .Alias("EFlowTrack_1", "TrackTools::getModifiedTrackStates(_Tracks_trackStates)")
+                .Define("EFlowTrack_1", "TrackTools::getModifiedTrackStates(_Tracks_trackStates)")
                 # (must be an object of type ROOT::VecOps::RVec<edm4hep::TrackState>)
                 .Define("EFlowTrack_2", "1.0 / ReconstructedParticle::get_p(ReconstructedParticles)")
                 # (must be an object of type rv::RVec<edm4hep::Quantity>)
