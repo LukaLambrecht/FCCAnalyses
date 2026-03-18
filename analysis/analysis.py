@@ -477,6 +477,29 @@ class RDFanalysis():
             .Define("Event_nTracksPerJetSum", "ROOT::VecOps::Sum(Jets_nTracksPerJet)")
         )
 
+        # some more event level variables
+        # (that rely on the above jet clustering info)
+        dfout = (
+            dfout
+
+            # general properties
+            .Define("Event_mass", "JetConstituentsUtils::InvariantMass(Jets_p4[0], Jets_p4[1])")
+            .Define("Event_njets", "(int)Jets_p4.size()")
+            .Define("Event_Bz", "ReconstructedParticle2Track::Bz(ReconstructedParticles, EFlowTrack_1, Reco2TrackLinks)")
+
+            # compute the residues for jet-constituents on significant kinematic variables as a check
+            # notes:
+            # - "tlv_jets" seems to mean: "the lorentz vectors of the jets, calculated directly from the jets"
+            # - "sum_tlv_jcs" seems to mean: "the lorentz vectors of the jets, but calculated by summing all constituents"
+            .Define("tlv_jets", "JetConstituentsUtils::compute_tlv_jets(jets_ee_genkt)")
+            .Define("sum_tlv_jcs", "JetConstituentsUtils::sum_tlv_constituents(JetsConstituents)")
+            .Define("Event_de", "JetConstituentsUtils::compute_residue_energy(tlv_jets, sum_tlv_jcs)")
+            .Define("Event_dpt", "JetConstituentsUtils::compute_residue_pt(tlv_jets, sum_tlv_jcs)")
+            .Define("Event_dphi", "JetConstituentsUtils::compute_residue_phi(tlv_jets, sum_tlv_jcs)")
+            .Define("Event_dtheta", "JetConstituentsUtils::compute_residue_theta(tlv_jets, sum_tlv_jcs)")
+
+        )
+
         # find secondary tracks (for later use in secondary vertex finding)
         dfout = (
             dfout
@@ -594,11 +617,6 @@ class RDFanalysis():
         dfout = (
             dfout
 
-            # define event-level properties
-            .Define("Event_mass", "JetConstituentsUtils::InvariantMass(Jets_p4[0], Jets_p4[1])")
-            .Define("Event_njets", "(int)Jets_p4.size()")
-            .Define("Event_Bz", "ReconstructedParticle2Track::Bz(ReconstructedParticles, EFlowTrack_1, Reco2TrackLinks)")
-
             # Extract ParticleID types for all jet constituents
             # ParticleID.type legend: 0:Track, 1:Electron, 2:Muon, 3:Track from V0, 
             #                         4:EM, 5:Ecal hadron/residual, 6:Hcal element, 7:Lcal element
@@ -615,6 +633,13 @@ class RDFanalysis():
             .Define("JetsConstituents_isChargedHad", "get_isChargedHad_from_type(JetsConstituents_Types)")
             .Define("JetsConstituents_isGamma", "get_isGamma_from_type(JetsConstituents_Types)")
             .Define("JetsConstituents_isNeutralHad", "get_isNeutralHad_from_type(JetsConstituents_Types)")
+
+            # counting the types of particles per jet
+            .Define("Jets_nMu", "JetConstituentsUtils::count_type(JetsConstituents_isMu)")
+            .Define("Jets_nEl", "JetConstituentsUtils::count_type(JetsConstituents_isEl)")
+            .Define("Jets_nChargedHad", "JetConstituentsUtils::count_type(JetsConstituents_isChargedHad)")
+            .Define("Jets_nPhoton", "JetConstituentsUtils::count_type(JetsConstituents_isGamma)")
+            .Define("Jets_nNeutralHad", "JetConstituentsUtils::count_type(JetsConstituents_isNeutralHad)")
 
             # basic kinematics
             .Define("JetsConstituents_e", "JetConstituentsUtils::get_e(JetsConstituents)")
@@ -772,40 +797,13 @@ class RDFanalysis():
             .Define("JetsConstituents_linePCAToPrimaryVertex_x", "IPAlephTools::getPCA_x(linePCAToPrimaryVertex)")
             .Define("JetsConstituents_linePCAToPrimaryVertex_y", "IPAlephTools::getPCA_y(linePCAToPrimaryVertex)")
             .Define("JetsConstituents_linePCAToPrimaryVertex_z", "IPAlephTools::getPCA_z(linePCAToPrimaryVertex)")
-
-            # counting the types of particles per jet
-            .Define("Jets_nMu", "JetConstituentsUtils::count_type(JetsConstituents_isMu)")
-            .Define("Jets_nEl", "JetConstituentsUtils::count_type(JetsConstituents_isEl)")
-            .Define("Jets_nChargedHad", "JetConstituentsUtils::count_type(JetsConstituents_isChargedHad)")
-            .Define("Jets_nPhoton", "JetConstituentsUtils::count_type(JetsConstituents_isGamma)")
-            .Define("Jets_nNeutralHad", "JetConstituentsUtils::count_type(JetsConstituents_isNeutralHad)")
-        
-            # compute the residues jet-constituents on significant kinematic variables as a check
-            # notes:
-            # - "tlv_jets" seems to mean: "the lorentz vectors of the jets, calculated directly from the jets"
-            # - "sum_tlv_jcs" seems to mean: "the lorentz vectors of the jets, but calculated by summing all constituents"
-            .Define("tlv_jets", "JetConstituentsUtils::compute_tlv_jets(jets_ee_genkt)")
-            .Define("sum_tlv_jcs", "JetConstituentsUtils::sum_tlv_constituents(JetsConstituents)")
-            .Define("Event_de", "JetConstituentsUtils::compute_residue_energy(tlv_jets, sum_tlv_jcs)")
-            .Define("Event_dpt", "JetConstituentsUtils::compute_residue_pt(tlv_jets, sum_tlv_jcs)")
-            .Define("Event_dphi", "JetConstituentsUtils::compute_residue_phi(tlv_jets, sum_tlv_jcs)")
-            .Define("Event_dtheta", "JetConstituentsUtils::compute_residue_theta(tlv_jets, sum_tlv_jcs)")
-            
         )
+
         return dfout
 
     def output():
 
         # define what output to store
-        # note: because of RDataFrame's smart execution, only the parts of the code
-        #       of which the output is needed downstream are evaluated.
-        #       hence these flags do not only control output size but also runtime (? to check).
-        # note: the downstream ntuplizer script can not (yet) deal with this dynamic output,
-        #       so it will crash if some expected branches are not present.
-        #       for now, every flag below needs to be set to True for the ntuplizer not to crash
-        #       (to make more dynamic later...)
-        do_secondary_vertices = True
-        do_v0candidates = True
 
         # define output branches
         branchList = []
@@ -867,11 +865,6 @@ class RDFanalysis():
             'Jets_eta',
             'Jets_theta',
             'Jets_nConstituents',
-            'Jets_nMu',
-            'Jets_nEl',
-            'Jets_nChargedHad',
-            'Jets_nPhoton',
-            'Jets_nNeutralHad',
             'Jets_nTracksPerJet',
             'Jets_nSelectedTracksPerJet',
         ]
@@ -885,15 +878,13 @@ class RDFanalysis():
         ]
 
         # secondary track counters
-        if( do_secondary_vertices or do_v0candidates ):
-            branchList += [
-                'Event_nSecondaryTracks',
-                'Jets_nSecondaryTracksPerJet'
-            ]
+        branchList += [
+            'Event_nSecondaryTracks',
+            'Jets_nSecondaryTracksPerJet'
+        ]
 
         # secondary vertex variables
-        if do_secondary_vertices:
-          branchList += [
+        branchList += [
             'Event_nSV',
             'Jets_nSV',
             'SecondaryVertices_xrel',
@@ -912,11 +903,10 @@ class RDFanalysis():
             'SecondaryVertices_dxyz',
             'SecondaryVertices_cosPointing',
             'SecondaryVertices_correctedMass',
-          ]
+        ]
 
         # V0-candidate variables
-        if do_v0candidates:
-          branchList += [
+        branchList += [
             'Event_nV0Candidates',
             'Jets_nV0Candidates',
             'Jets_nKsCandidates',
@@ -938,7 +928,7 @@ class RDFanalysis():
             'V0Candidates_dxyz',
             'V0Candidates_cosPointing',
             'V0Candidates_correctedMass',
-          ]
+        ]
 
         # jet-constituent-level variables
         branchList += [
@@ -1037,6 +1027,11 @@ class RDFanalysis():
             'JetsConstituents_isChargedHad',
             'JetsConstituents_isGamma', 
             'JetsConstituents_isNeutralHad',
+            'Jets_nMu',
+            'Jets_nEl',
+            'Jets_nChargedHad',
+            'Jets_nPhoton',
+            'Jets_nNeutralHad',
         ]
 
         return branchList    
