@@ -434,7 +434,6 @@ int main(int argc, char* argv[]) {
   float is_udsg = 0.;
   int nconst = 0;
   int nphotons = 0;
-  int ncharged = 0;
   int nchargedhad = 0;
   int nneutralhad = 0;
   int nel = 0;
@@ -627,7 +626,6 @@ int main(int argc, char* argv[]) {
   
   ntuple->Branch("nconst", &nconst, "nconst/I");
   ntuple->Branch("nphotons", &nphotons, "nphotons/I");
-  ntuple->Branch("ncharged", &ncharged, "ncharged/I");
   ntuple->Branch("nneutralhad", &nneutralhad, "nneutralhad/I");
   ntuple->Branch("nchargedhad", &nchargedhad, "nchargedhad/I");
   ntuple->Branch("nel", &nel, "nel/I");
